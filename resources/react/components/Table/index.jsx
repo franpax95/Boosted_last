@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { beautifyDate, clone } from '../../utils';
 import { StyledCategoriesTable, StyledExercisesTable } from './style';
 
-export const CategoriesTable = ({ categories = [] }) => {
+export const CategoriesTable = memo(({ categories = [] }) => {
     /** Categories to show in the table */
     const [_categories, setCategories] = useState(categories);
 
@@ -35,10 +35,10 @@ export const CategoriesTable = ({ categories = [] }) => {
             ))}
         </StyledCategoriesTable>
     );
-}
+});
 
-export const ExercisesTable = ({ exercises = [], withCategories = true }) => {
-    /** Categories to show in the table */
+export const ExercisesTable = memo(({ exercises = [], withCategories = true }) => {
+    /** Exercises to show in the table */
     const [_exercises, setExercises] = useState(exercises);
 
     useEffect(() => {
@@ -79,4 +79,4 @@ export const ExercisesTable = ({ exercises = [], withCategories = true }) => {
             ))}
         </StyledExercisesTable>
     );
-}
+});

@@ -1,11 +1,12 @@
-import { clone } from 'lodash';
-import React, { useContext, useEffect, useState } from 'react';
-import { PrimaryLink } from '../../components/Anchor';
-import { SearchBar } from '../../components/Input';
-import { ExercisesTable } from '../../components/Table';
+import React, { useContext, useEffect, useState, Suspense, lazy } from 'react';
 import { ExercisesContext } from '../../contexts/ExercisesContext';
-import { deleteAccents } from '../../utils';
 import { StyledExercises, StyledNotFoundExercises } from './style';
+import { clone, deleteAccents } from '../../utils';
+
+// const ExercisesTable = lazy(() => new Promise(resolve => setTimeout(() => resolve(import('../../components/Table').then(module => ({ default: module.ExercisesTable }))), 1000)));
+const ExercisesTable = lazy(() => import('../../components/Table').then(module => ({ default: module.ExercisesTable })));
+const SearchBar = lazy(() => import('../../components/Input').then(module => ({ default: module.SearchBar })));
+const PrimaryLink = lazy(() => import('../../components/Anchor').then(module => ({ default: module.PrimaryLink })));
 
 export default function Exercises() {
     /** Exercises Context */
@@ -53,39 +54,41 @@ export default function Exercises() {
     }
 
     // Oculta la pantalla principal
-    if(hide) {
+    if (hide) {
         return '';
     }
 
     return (
-        <StyledExercises>
-            <PrimaryLink className="add-exercise-link" to="/exercises/add">Añadir ejercicio</PrimaryLink>
+        <Suspense>
+            <StyledExercises>
+                <PrimaryLink className="add-exercise-link" to="/exercises/add">Añadir ejercicio</PrimaryLink>
 
-            <h1 className="title">Ejercicios</h1>
+                <h1 className="title">Ejercicios</h1>
 
-            {exercises && exercises.length > 0 && <SearchBar 
-                placeholder="Filtrar ejercicios..." 
-                value={search} 
-                onChange={e => setSearch(e.target.value)} 
-                onClear={() => setSearch('')} 
-            />}
+                {exercises && exercises.length > 0 && <SearchBar 
+                    placeholder="Filtrar ejercicios..." 
+                    value={search} 
+                    onChange={e => setSearch(e.target.value)} 
+                    onClear={() => setSearch('')} 
+                />}
 
-            {exercises && exercises.length > 0 && 
-                <ExercisesTable exercises={filteredExercises} />
-            }
+                {exercises && exercises.length > 0 && 
+                    <ExercisesTable exercises={filteredExercises} />
+                }
 
-            {/** Mensaje en caso de no haber resultados filtrados */}
-            {exercises && exercises.length > 0 && filteredExercises.length === 0 && (
-                <StyledNotFoundExercises>No existen ejercicios coincidentes con '{search}'</StyledNotFoundExercises>
-            )}
+                {/** Mensaje en caso de no haber resultados filtrados */}
+                {exercises && exercises.length > 0 && filteredExercises.length === 0 && (
+                    <StyledNotFoundExercises>No existen ejercicios coincidentes con '{search}'</StyledNotFoundExercises>
+                )}
 
-            {/** Si todavía no hay ejercicios asociados al usuario... */}
-            {exercises && exercises.length === 0 && (
-                <StyledNotFoundExercises>
-                    <span>Todavía no has añadido ningún ejercicio.</span>
-                    <span>Puedes empezar pulsando el botón 'Añadir ejercicio'.</span>
-                </StyledNotFoundExercises>
-            )}
-        </StyledExercises>
+                {/** Si todavía no hay ejercicios asociados al usuario... */}
+                {exercises && exercises.length === 0 && (
+                    <StyledNotFoundExercises>
+                        <span>Todavía no has añadido ningún ejercicio.</span>
+                        <span>Puedes empezar pulsando el botón 'Añadir ejercicio'.</span>
+                    </StyledNotFoundExercises>
+                )}
+            </StyledExercises>
+        </Suspense>
     );
 }

@@ -1,14 +1,17 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState, Suspense, lazy } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router';
-import { PrimaryButton, SecondaryButton } from '../../components/Button';
-import { Input, PrimaryInput } from '../../components/Input';
+import { AiOutlineClose } from 'react-icons/ai';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
 import { SettingsContext } from '../../contexts/SettingsContext';
-import { clone, deleteArrayElement, getPromise } from '../../utils';
 import { StyledCategoriesAdd } from './style';
-import { AiOutlineClose } from 'react-icons/ai';
 import { THEME } from '../../states/theming';
+import { clone, deleteArrayElement, getPromise } from '../../utils';
+import { ScreenSpinner } from '../../components/Spinner';
+
+const PrimaryButton = lazy(() => import('../../components/Button').then(module => ({ default: module.PrimaryButton })));
+const SecondaryButton = lazy(() => import('../../components/Button').then(module => ({ default: module.SecondaryButton })));
+const PrimaryInput = lazy(() => import('../../components/Input').then(module => ({ default: module.PrimaryInput })));
 
 export default function CategoriesAdd() {
     /** Navigate effect */
@@ -127,31 +130,33 @@ export default function CategoriesAdd() {
     }
 
     return (
-        <StyledCategoriesAdd>
-            <form onSubmit={onSubmit}>
-                <PrimaryButton className="add-category-link">Pulsa aquí para insertar la{nameController.length > 1 ? 's' : ''} categoría{nameController.length > 1 ? 's' : ''}</PrimaryButton>
+        <Suspense fallback={<ScreenSpinner />}>
+            <StyledCategoriesAdd>
+                <form onSubmit={onSubmit}>
+                    <PrimaryButton className="add-category-link">Pulsa aquí para insertar la{nameController.length > 1 ? 's' : ''} categoría{nameController.length > 1 ? 's' : ''}</PrimaryButton>
 
-                <h1 className="title">Añadir categoría</h1>
+                    <h1 className="title">Añadir categoría</h1>
 
-                {nameController.map((name, index) => (
-                    <div className="row" key={index}>
-                        <PrimaryInput
-                            name="name" 
-                            value={name} 
-                            onChange={event => onInputChange(event, index)} 
-                            placeholder="Nombre de la categoría" 
-                            label={`Categoría ${nameController.length > 1 ? (index + 1) : ''}`}
-                            autoComplete="off"
-                        />
+                    {nameController.map((name, index) => (
+                        <div className="row" key={index}>
+                            <PrimaryInput
+                                name="name" 
+                                value={name} 
+                                onChange={event => onInputChange(event, index)} 
+                                placeholder="Nombre de la categoría" 
+                                label={`Categoría ${nameController.length > 1 ? (index + 1) : ''}`}
+                                autoComplete="off"
+                            />
 
-                        {nameController.length > 1 && <button className="quit" onClick={event => onQuitClick(event, index)}>
-                            <AiOutlineClose />
-                        </button>}
-                    </div>
-                ))}
+                            {nameController.length > 1 && <button className="quit" onClick={event => onQuitClick(event, index)}>
+                                <AiOutlineClose />
+                            </button>}
+                        </div>
+                    ))}
 
-                <SecondaryButton type="button" onClick={onAddClick}>¡Quiero añadir más categorías!</SecondaryButton>
-            </form>
-        </StyledCategoriesAdd>
+                    <SecondaryButton type="button" onClick={onAddClick}>¡Quiero añadir más categorías!</SecondaryButton>
+                </form>
+            </StyledCategoriesAdd>
+        </Suspense>
     );
 }

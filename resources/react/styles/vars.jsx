@@ -2,16 +2,16 @@ import theme from 'styled-theming';
 import { THEME } from '../states/theming';
 import { lighten, darken, addOpacityToHex } from './utils';
 
-
 export const textLight = '#4D4D4D';
 export const textDark = '#F5F5F5';
 
 export const successColor = '#28a745';
 export const dangerColor = '#dc3545';
 
-export const primaryLight = '#FF971D';
+// export const primaryLight = '#FF971D';
+export const primaryLight = '#3a5ddf';
 // export const primaryLight = '#888888';
-export const secondaryLight = '#FFE8D6';
+export const secondaryLight = '#bdc9f4';
 // export const secondaryLight = '#FFE8DF';
 export const tertiaryLight = '#F9F6F7';
 // export const tertiaryLight = '#F0F0F0';
@@ -19,7 +19,8 @@ export const quaternaryLight = '#FFFFFF';
 // export const quaternaryLight = '#FFFFFF';
 
 // export const primaryDark = '#A7D129';
-export const primaryDark = '#FF4C29';
+// export const primaryDark = '#FF4C29';
+export const primaryDark = '#7fba12';
 // export const secondaryDark = '#616F39';
 export const secondaryDark = '#334756';
 // export const tertiaryDark = '#3E432E';

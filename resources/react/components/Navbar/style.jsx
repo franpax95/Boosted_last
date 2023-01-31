@@ -1,303 +1,276 @@
 import styled from 'styled-components';
 import theme from 'styled-theming';
 import { THEME } from '../../states/theming';
-import styles from '../../styles';
-import { Link } from 'react-router-dom';
+import styles, { quaternaryDark, quaternaryLight } from '../../styles/vars';
 import { addOpacityToHex, darken, lighten } from '../../styles/utils';
 
 const { color, font, media, transitionDuration } = styles;
-const { [THEME.LIGHT]: primaryLight, [THEME.DARK]: primaryDark } = color.primary;
-const { [THEME.LIGHT]: secondaryLight, [THEME.DARK]: secondaryDark } = color.secondary;
-const { [THEME.LIGHT]: tertiaryLight, [THEME.DARK]: tertiaryDark } = color.tertiary;
-const { [THEME.LIGHT]: quaternaryLight, [THEME.DARK]: quaternaryDark } = color.quaternary;
-const { [THEME.LIGHT]: textLight, [THEME.DARK]: textDark } = color.text;
+const { primary, secondary, tertiary, quaternary, success, danger } = color;
+const link_colors = ['#32a7e2', '#ff7551', '#6c5ecf', '#22b07d'];
 
-export const navbarHeight = '50px';
+export const StyledSidebar = styled.nav`
+    --td: .7s;      /** Transition Duration */
+    --htd: .35s;    /** HALF Transition Duration */
+    --sidebar-width: 205px;
+    @media (min-width: ${media.sm}px) { --sidebar-width: 220px; }
+    @media (min-width: ${media.md}px) { --sidebar-width: 250px; }
+    @media (min-width: ${media.lg}px) { --sidebar-width: 300px; }
 
-export const StyledNavbar = styled.div`
-    z-index: 1000;
-    width: 100%;
-    height: ${navbarHeight};
-    padding: 0 .75rem;
-
-    position: fixed;
-    top: 0;
-    left: 0;
-
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-
-    background-color: ${theme('mode', { [THEME.LIGHT]: darken(quaternaryLight.default, 10), [THEME.DARK]: lighten(quaternaryDark.default, 10) })};
-    background-color: ${theme('mode', { [THEME.LIGHT]: darken(tertiaryLight.default, 0), [THEME.DARK]: lighten(tertiaryDark.default, 0) })};
-
-    font-size: ${font.md};
-
-    transition:
-        padding ${transitionDuration},
-        background-color ${transitionDuration},
-        color ${transitionDuration},
-        font-size ${transitionDuration};
-
-    @media (min-width: ${media.sm}px) {
-        padding: 0 1.5rem;
-    }
-
-    @media (min-width: ${media.md}px) {
-        padding: 0 2rem;
-    }
-
-    @media (min-width: ${media.lg}px) {
-        padding: 0 3rem;
-    }
-
-    .burger {
-        width: 40px;
-        display: block;
-        background-color: transparent;
-
-        @media (min-width: ${media.md}px) {
-            display: none;
-        }
-    }
-`;
-
-export const Logo = styled(Link)`
-    width: auto;
-
-    display: flex;
-    gap: .5rem;
-    align-items: center;
-
-    color: ${theme('mode', { [THEME.LIGHT]: textLight, [THEME.DARK]: textDark })};
-
-    font-size: ${font.xl};
-    font-weight: bold;
-
-    transition: color ${transitionDuration}, font-size ${transitionDuration};
-
-    svg:nth-child(1) {
-        transform: scale(1.5);
-    }
-
-    svg:nth-child(3) {
-        transform: scale(1.5) rotate(70deg);
-    }
-
-    @media (min-width: ${media.md}px) {
-        width: 200px;
-    }
-`;
-
-export const Links = styled.div`
-    display: none;
-    flex-direction: row;
-    gap: .25rem;
-    align-items: center;
-    justify-content: center;
-
-    transition: opacity ${transitionDuration};
-
-    @media (min-width: ${media.md}px) {
-        display: flex;
-    }
-`;
-
-export const StyledLink = styled(Link)`
-    padding: .5rem;
-
-    color: ${theme('mode', { [THEME.LIGHT]: textLight, [THEME.DARK]: textDark })};
-
-    font-weight: bold;
-    letter-spacing: 1px;
-
-    transition: color ${transitionDuration};
-
-    &:hover {
-        color: ${theme('mode', { [THEME.LIGHT]: lighten(textLight, 35), [THEME.DARK]: darken(textDark, 40) })};
-    }
-
-    &:active {
-        color: ${theme('mode', { [THEME.LIGHT]: lighten(textLight, 50), [THEME.DARK]: darken(textDark, 60) })};
-    }
-
-    &:disabled {
-        color: ${theme('mode', { [THEME.LIGHT]: lighten(textLight, 80), [THEME.DARK]: darken(textDark, 80) })};
-    }
-`;
-
-export const StyledSettingsDropdown = styled.div`
-    width: 40px;
+    z-index: 200;
+    width: 0px;
     height: 100%;
+    min-height: 100%;
 
     position: relative;
 
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
+    display: grid;
+    grid-template-rows: 1fr 100px;
 
-    @media (min-width: ${media.md}px) {
-        width: 200px;
-    }
+    transition: width var(--td, .7s) ease-in-out;
 
-    .icon {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        background-color: rgba(0, 0, 0, 0);
-        color: ${theme('mode', { [THEME.LIGHT]: textLight, [THEME.DARK]: textDark })};
-
-        font-size: ${font.xl};
-
-        transition: color ${transitionDuration};
-
-        &:hover {
-            color: ${theme('mode', { [THEME.LIGHT]: lighten(textLight, 35), [THEME.DARK]: darken(textDark, 40) })};
-        }
-
-        &:active {
-            color: ${theme('mode', { [THEME.LIGHT]: lighten(textLight, 50), [THEME.DARK]: darken(textDark, 60) })};
-        }
-
-        &:disabled {
-            color: ${theme('mode', { [THEME.LIGHT]: lighten(textLight, 80), [THEME.DARK]: darken(textDark, 80) })};
-        }
-    }
-
-    .dropdown {
-        z-index: 1;
-        pointer-events: none;
-        width: 100vw;
-        width: fit-content;
-        min-width: 300px;
-        max-width: min(95vw, 450px);
-        padding: 1rem 2rem;
-
+    @media (max-width: ${media.md}px) { 
         position: absolute;
-        top: 110%;
         right: 0;
+        top: 0;
+    }
+
+    .sidebar-content {
+        z-index: 1;
+
+        width: var(--sidebar-width, 200px);
+        max-height: 100%;
+        min-height: 100%;
 
         display: flex;
         flex-direction: column;
-        gap: 1.25rem;
-        justify-content: center;
+        gap: 2rem;
+        justify-content: flex-start;
         align-items: center;
 
-        opacity: 0;
-        border: solid 1px ${theme('mode', { [THEME.LIGHT]: addOpacityToHex(darken(primaryLight.default, 8), .25), [THEME.DARK]: addOpacityToHex(lighten(primaryDark.default, 50), .25) })};
-        border-radius: 12px;
-        background-color: ${theme('mode', { [THEME.LIGHT]: darken(quaternaryLight.default, 8), [THEME.DARK]: lighten(quaternaryDark.default, 20) })};
-        color: ${theme('mode', { [THEME.LIGHT]: darken(primaryLight.default, 8), [THEME.DARK]: lighten(primaryDark.default, 50) })};
-        box-shadow: 0px 3px 10px -5px ${theme('mode', { [THEME.LIGHT]: darken(primaryLight.default, 8), [THEME.DARK]: lighten(primaryDark.default, 50) })};
+        overflow-y: auto;
+        overflow-x: hidden;
 
-        transition: 
-            opacity .25s,
-            border-color ${transitionDuration},
-            background-color ${transitionDuration},
-            color ${transitionDuration},
-            box-shadow ${transitionDuration};
-
-        &.active {
-            pointer-events: initial;
-            opacity: 1;
+        .logo,
+        .link {
+            z-index: 1;
         }
 
-        .spacer {
-            width: 60%;
-            height: 1.5px;
-            background-color: ${theme('mode', { [THEME.LIGHT]: darken(primaryLight.default, 8), [THEME.DARK]: lighten(primaryDark.default, 50) })};
-            transition: background-color ${transitionDuration};
-        }
+        .logo {
+            width: 100%;
+            height: 100vh;
+            max-height: 125px;
 
-        .title {
-            font-size: ${font.lg};
+            & svg {
+                transform: scale(1.1);
+            }
 
-            transition: font-size ${transitionDuration};
-
-            @media (min-width: ${media.md}px) {
-                font-size: 1.5em;
+            &:hover svg {
+                transform: scale(1.15);
             }
         }
 
-        .user-card {
+        .link {
             width: 100%;
-            display: grid;
-            column-gap: .5rem;
-            row-gap: .25rem;
-            grid-template-columns: 50px 1fr;
-            grid-template-areas:
-                'avatar alias'
-                'avatar email';
-            justify-content: center;
-            align-items: center;
+            height: 45px;
+            padding-left: 2rem;
 
-            .avatar {
-                grid-area: avatar;
+            display: grid;
+            gap: .7rem;
+            grid-template-columns: 40px 1fr;
+            align-items: center;
+            /* justify-content: center; */
+
+            font-size: ${font.lg};
+            font-weight: 600;
+            transition: all ${transitionDuration};
+
+            @media (max-width: ${media.sm}px) { padding-left: .75rem; }
+
+            .text,
+            .icon {
+                color: ${theme('mode', { [THEME.LIGHT]: '#a6a6a6', [THEME.DARK]: '#cccccc' })};
+                transition: background-color .15s, color .15s;
+            }
+
+            .icon {
+                width: 40px;
+                height: 40px;
 
                 display: flex;
                 justify-content: center;
                 align-items: center;
 
-                font-size: ${font.xxl};
+                border-radius: 10px;
+
+                font-size: ${font.xl};
             }
 
-            .alias {
-                grid-area: alias;
-                font-size: ${font.lg};
-                font-weight: bold;
+            &.active .text,
+            &:hover .text {
+                color: whitesmoke;
+                font-weight: 700;
             }
 
-            .email {
-                grid-area: email;
-                font-size: ${font.md};
+            &.active .icon,
+            &:hover .icon {
+                color: whitesmoke;
             }
+
+            ${() => {
+                let str = '';
+                for (let i = 0; i < link_colors.length; i++) {
+                    str += `
+                        &:nth-child(${i + 1}).active .icon,
+                        &:nth-child(${i + 1}):hover .icon {
+                            background-color: ${link_colors[i]};
+                        }
+                    `;
+                }
+                return str;
+            }}
+        }
+
+        .animated {
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: 
+                all ${transitionDuration} linear 0s,
+                opacity .1s ease-in-out var(--htd),
+                transform .1s ease-in-out var(--htd);
         }
     }
-`;
 
-export const StyledSidebar = styled.div`
-    width: 40px;
-    height: 100%;
+    .sidebar-footer {
+        z-index: 1;
+        width: var(--sidebar-width, 200px);
 
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-
-    @media (min-width: ${media.md}px) {
-        display: none;
-    }
-
-    .BurgerButton {
-        z-index: 3;
-    }
-
-    .sidebar {
-        --sidebar-width: 250px;
-
-        z-index: 2;
-        width: 250px;
-        width: var(--sidebar-width, 250px);
-        height: 100%;
-        padding-top: 5rem;
-
-        position: fixed;
-        top: 0;
-        left: -250px;
-        left: calc(-1 * var(--sidebar-width, 250px));
+        position: relative;
 
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
+        justify-content: space-evenly;
+        align-items: center;
 
-        background-color: ${theme('mode', { [THEME.LIGHT]: primaryLight.default, [THEME.DARK]: primaryDark.default })};
+        /** Separation Bar */
+        &::after {
+            content: "";
 
-        transition: 
-            left ${transitionDuration},
-            background-color ${transitionDuration};
+            width: 50px;
+            height: 1px;
 
-        &.open {
-            left: 0;
+            position: absolute;
+            top: 0;
+            left: 50%;
+
+            clip-path: polygon(75% 0%, 100% 50%, 75% 100%, 25% 100%, 0 50%, 25% 0);
+            border-radius: 9999px;
+            background-color: ${quaternary.default};
+
+            transform: translateX(-50%);
+        }
+    }
+
+    .sidebar-burger-btn {
+        padding: 10px;
+
+        position: absolute;
+        left: -5rem;
+        top: 2rem;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        background-color: ${theme('mode', { [THEME.LIGHT]: addOpacityToHex(quaternaryLight, .5), [THEME.DARK]: addOpacityToHex(quaternaryDark, .5) })};
+
+        transition: background-color ${transitionDuration};
+
+        .BurgerButton:hover span {
+            background: ${primary.active};
+        }
+    }
+
+    &.active {
+        width: var(--sidebar-width, 200px);
+
+        .sidebar-content {
+            .animated {
+                opacity: 1;
+                transform: translateY(0);
+                transition: 
+                    all ${transitionDuration} linear 0s,
+                    opacity var(--htd) ease-in-out var(--htd),
+                    transform var(--htd) ease-in-out var(--htd);
+
+                ${() => {
+                    let str = '';
+                    for (let i = 2; i < 100; i++) {
+                        str += `&:nth-child(${i}) {
+                            transition: 
+                                all ${transitionDuration} linear 0s,
+                                opacity var(--htd) ease-in-out calc(var(--htd) + ${i / 10}s),
+                                transform var(--htd) ease-in-out calc(var(--htd) + ${i / 10}s);
+                        } `;
+                    }
+                    return str;
+                }}
+
+                /* &:nth-child(2) { 
+                    transition: 
+                        all ${transitionDuration} linear 0s,
+                        opacity var(--htd) ease-in-out calc(var(--htd) + .1s),
+                        transform var(--htd) ease-in-out calc(var(--htd) + .1s);
+                }
+
+                &:nth-child(3) { 
+                    transition: 
+                        all ${transitionDuration} linear 0s,
+                        opacity var(--htd) ease-in-out calc(var(--htd) + .2s),
+                        transform var(--htd) ease-in-out calc(var(--htd) + .2s);
+                }
+
+                &:nth-child(4) { 
+                    transition: 
+                        all ${transitionDuration} linear 0s,
+                        opacity var(--htd) ease-in-out calc(var(--htd) + .3s),
+                        transform var(--htd) ease-in-out calc(var(--htd) + .3s);
+                }
+
+                &:nth-child(5) { 
+                    transition: 
+                        all ${transitionDuration} linear 0s,
+                        opacity var(--htd) ease-in-out calc(var(--htd) + .4s),
+                        transform var(--htd) ease-in-out calc(var(--htd) + .4s);
+                }
+
+                &:nth-child(6) { 
+                    transition: 
+                        all ${transitionDuration} linear 0s,
+                        opacity var(--htd) ease-in-out calc(var(--htd) + .5s),
+                        transform var(--htd) ease-in-out calc(var(--htd) + .5s);
+                }
+
+                &:nth-child(7) { 
+                    transition: 
+                        all ${transitionDuration} linear 0s,
+                        opacity var(--htd) ease-in-out calc(var(--htd) + .55s),
+                        transform var(--htd) ease-in-out calc(var(--htd) + .55s);
+                }
+
+                &:nth-child(8) { 
+                    transition: 
+                        all ${transitionDuration} linear 0s,
+                        opacity var(--htd) ease-in-out calc(var(--htd) + .6s),
+                        transform var(--htd) ease-in-out calc(var(--htd) + .6s);
+                }
+
+                &:nth-child(9) { 
+                    transition: 
+                        all ${transitionDuration} linear 0s,
+                        opacity var(--htd) ease-in-out calc(var(--htd) + .65s),
+                        transform var(--htd) ease-in-out calc(var(--htd) + .65s);
+                } */
+            }
         }
     }
 `;

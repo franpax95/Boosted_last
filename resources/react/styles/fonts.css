@@ -1,0 +1,19 @@
+/**
+ * Archivo para importar fuentes.
+ *
+ * Importar las fuentes desde el GlobalStyles causa que se pidan cada vez que se navega, haciendo un pequeño blink entre
+ * la fuente por defecto y la pedida.
+ */
+@font-face {
+    font-family: 'Montserrat'; 
+    src: 
+        url('../../fonts/Montserrat/Montserrat-VariableFont_wght.ttf') format('truetype'),
+        url('../../fonts/Montserrat/Montserrat-Italic-VariableFont_wght.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Syncopate'; 
+    src: 
+        url('../../fonts/Syncopate/Syncopate-Regular.ttf') format('truetype'),
+        url('../../fonts/Syncopate/Syncopate-Bold.ttf') format('truetype');
+}

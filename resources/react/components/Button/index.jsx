@@ -1,9 +1,13 @@
-import React, { useContext } from 'react';
+import React, { Suspense, useContext, lazy } from 'react';
 import { SettingsContext } from '../../contexts/SettingsContext';
 import { THEME } from '../../states/theming';
-import { StyledPrimaryButton, StyledSecondaryButton, StyledTertiaryButton, ToggleWrapper, ToggleButton, StyledBurgerButton, StyledSuccessButton, StyledDangerButton } from './style';
-import { BsFillSunFill, BsFillMoonFill } from 'react-icons/bs';
+import { StyledPrimaryButton, StyledSecondaryButton, StyledTertiaryButton, StyledBurgerButton, StyledSuccessButton, StyledDangerButton, StyledThemeToggle, StyledLanguageToggle } from './style';
+import { MdLightMode, MdNightlight } from 'react-icons/md';
 import { LANG } from '../../states/lang';
+
+const SvgSwitch = lazy(() => import('../SvgComponents/svg-switch'));
+const EnglandFlagSVG = lazy(() => import('../SvgComponents').then(module => ({ default: module.EnglandFlagSVG })));
+const SpainFlagSVG = lazy(() => import('../SvgComponents').then(module => ({ default: module.SpainFlagSVG })));
 
 export const PrimaryButton = ({ type, className = '', onClick, disabled, children }) => {
     return <StyledPrimaryButton type={type} className={className} onClick={onClick} disabled={disabled}>{ children }</StyledPrimaryButton>;
@@ -25,9 +29,9 @@ export const DangerButton = ({ type, className = '', onClick, disabled, children
     return <StyledDangerButton type={type} className={className} onClick={onClick} disabled={disabled}>{ children }</StyledDangerButton>;
 }
 
-export const BurgerButton = ({ active, onClick, disabled }) => {
+export const BurgerButton = ({ active, onClick, disabled, className = '' }) => {
     return (
-        <StyledBurgerButton className={`BurgerButton ${active ? 'open' : ''}`} onClick={onClick} disabled={disabled}>
+        <StyledBurgerButton className={`BurgerButton ${active ? 'open' : ''} ${className}`} onClick={onClick} disabled={disabled}>
             <span></span>
             <span></span>
             <span></span>
@@ -35,62 +39,60 @@ export const BurgerButton = ({ active, onClick, disabled }) => {
     );
 }
 
+/**
+ * Componente Toggle para cambiar de Tema
+ */
 export const ThemeToggle = () => {
+    /** Settings Context to change theme */
     const { theme, setTheme } = useContext(SettingsContext);
 
-    const onLightClick = event => {
-        event.preventDefault();
-        event.stopPropagation();
-        setTheme(THEME.LIGHT);
-    }
-
-    const onDarkClick = event => {
-        event.preventDefault();
-        event.stopPropagation();
-        setTheme(THEME.DARK);
+    /** Manejador de eventos 'change' del input check */
+    const onToggleChange = event => {
+        const { checked } = event.target;
+        setTheme(checked ? THEME.DARK : THEME.LIGHT);
     }
 
     return (
-        <ToggleWrapper>
-            <ToggleButton active={theme === THEME.LIGHT} onClick={onLightClick}>
-                <BsFillSunFill />
-                <span>Tema claro</span>
-            </ToggleButton>
-
-            <ToggleButton active={theme === THEME.DARK} onClick={onDarkClick}>
-                <BsFillMoonFill />
-                <span>Tema oscuro</span>
-            </ToggleButton>
-        </ToggleWrapper>
+        <StyledThemeToggle>
+            <input type="checkbox" className="checkbox" onChange={onToggleChange} checked={theme === THEME.DARK} />
+            <div className="knobs">
+                <span className="text">{theme === THEME.LIGHT ? <MdLightMode /> : <MdNightlight />}</span>
+                <span className="square"></span>
+            </div>
+            <div className="layer"></div>
+        </StyledThemeToggle>
     );
 }
 
+/**
+ * Componente Toggle para cambiar de lenguaje
+ */
 export const LanguageToggle = () => {
+    /** Settings Context to change theme */
     const { lang, setLang } = useContext(SettingsContext);
 
-    const onEspClick = event => {
-        event.preventDefault();
-        event.stopPropagation();
-        setLang(LANG.ESP);
-    }
-
-    const onEngClick = event => {
-        event.preventDefault();
-        event.stopPropagation();
-        setLang(LANG.ENG);
+    /** Manejador de eventos 'change' del input check */
+    const onToggleChange = event => {
+        const { checked } = event.target;
+        setLang(checked ? LANG.ENG : LANG.ESP);
     }
 
     return (
-        <ToggleWrapper>
-            <ToggleButton active={lang === LANG.ESP} onClick={onEspClick}>
-                <BsFillSunFill />
-                <span>Español</span>
-            </ToggleButton>
-
-            <ToggleButton active={lang === LANG.ENG} onClick={onEngClick}>
-                <BsFillMoonFill />
-                <span>Inglés</span>
-            </ToggleButton>
-        </ToggleWrapper>
+        <Suspense>
+            <StyledLanguageToggle>
+                <input type="checkbox" className="checkbox" onChange={onToggleChange} checked={lang === LANG.ENG} />
+                <div className="knobs">
+                    <span className="text">
+                        <SvgSwitch 
+                            active={lang === LANG.ENG}
+                            front={<SpainFlagSVG />}
+                            cover={<EnglandFlagSVG />}
+                        />
+                    </span>
+                    <span className="square"></span>
+                </div>
+                <div className="layer"></div>
+            </StyledLanguageToggle>
+        </Suspense>
     );
 }

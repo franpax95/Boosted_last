@@ -1,11 +1,11 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { PrimaryLink } from '../../components/Anchor';
-import { Input, SearchBar } from '../../components/Input';
-import { CategoriesTable } from '../../components/Table';
+import React, { useContext, useEffect, useState, Suspense, lazy } from 'react';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
-import { clone, deleteAccents } from '../../utils';
 import { StyledCategories, StyledNotFoundCategories } from './style';
+import { clone, deleteAccents } from '../../utils';
+
+const CategoriesTable = lazy(() => import('../../components/Table').then(module => ({ default: module.CategoriesTable })));
+const SearchBar = lazy(() => import('../../components/Input').then(module => ({ default: module.SearchBar })));
+const PrimaryLink = lazy(() => import('../../components/Anchor').then(module => ({ default: module.PrimaryLink })));
 
 export default function Categories() {
     /** Categories Context */
@@ -58,40 +58,42 @@ export default function Categories() {
     }
 
     return (
-        <StyledCategories>
-            {/** Link a añadir categoría */}
-            <PrimaryLink className="add-category-link" to="/categories/add">Añadir categoría</PrimaryLink>
+        <Suspense>
+            <StyledCategories>
+                {/** Link a añadir categoría */}
+                <PrimaryLink className="add-category-link" to="/categories/add">Añadir categoría</PrimaryLink>
 
-            {/**  */}
-            <h1 className="title">Categorías</h1>
+                {/**  */}
+                <h1 className="title">Categorías</h1>
 
-            {/** Filtro de búsqueda */}
-            {categories && categories.length > 0 && (
-                <SearchBar 
-                    placeholder="Filtrar categorías..." 
-                    value={search} 
-                    onChange={e => setSearch(e.target.value)} 
-                    onClear={() => setSearch('')} 
-                />
-            )}
+                {/** Filtro de búsqueda */}
+                {categories && categories.length > 0 && (
+                    <SearchBar 
+                        placeholder="Filtrar categorías..." 
+                        value={search} 
+                        onChange={e => setSearch(e.target.value)} 
+                        onClear={() => setSearch('')} 
+                    />
+                )}
 
-            {/** Tabla de categorías, en caso de que hubiera */}
-            {categories && categories.length > 0 && (
-                <CategoriesTable categories={filteredCategories} />
-            )}
+                {/** Tabla de categorías, en caso de que hubiera */}
+                {categories && categories.length > 0 && (
+                    <CategoriesTable categories={filteredCategories} />
+                )}
 
-            {/** Mensaje en caso de no haber resultados filtrados */}
-            {categories && categories.length > 0 && filteredCategories.length === 0 && (
-                <StyledNotFoundCategories>No existen categorías coincidentes con '{search}'</StyledNotFoundCategories>
-            )}
+                {/** Mensaje en caso de no haber resultados filtrados */}
+                {categories && categories.length > 0 && filteredCategories.length === 0 && (
+                    <StyledNotFoundCategories>No existen categorías coincidentes con '{search}'</StyledNotFoundCategories>
+                )}
 
-            {/** Si todavía no hay categorías asociadas al usuario... */}
-            {categories && categories.length === 0 && (
-                <StyledNotFoundCategories>
-                    <span>Todavía no has añadido ninguna categoría.</span>
-                    <span>Puedes empezar pulsando el botón 'Añadir categoría'.</span>
-                </StyledNotFoundCategories>
-            )}
-        </StyledCategories>
+                {/** Si todavía no hay categorías asociadas al usuario... */}
+                {categories && categories.length === 0 && (
+                    <StyledNotFoundCategories>
+                        <span>Todavía no has añadido ninguna categoría.</span>
+                        <span>Puedes empezar pulsando el botón 'Añadir categoría'.</span>
+                    </StyledNotFoundCategories>
+                )}
+            </StyledCategories>
+        </Suspense>
     );
 }

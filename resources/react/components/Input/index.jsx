@@ -6,6 +6,7 @@ import { MdAdsClick } from 'react-icons/md';
 import { IoMdClose } from 'react-icons/io';
 import { config, useTransition } from 'react-spring';
 import { PrimaryButton } from '../Button';
+import { memo } from 'react';
 
 
 export const Input = ({ id, className = '', type = 'text', name, value, onChange, placeholder, autoComplete = 'on' }) => (
@@ -21,11 +22,13 @@ export const Input = ({ id, className = '', type = 'text', name, value, onChange
     />
 );
 
-export const PrimaryInput = ({ id = '', className = '', type = 'text', name = '', value, onChange, placeholder = '', autoComplete = 'on', label = '' }) => {
+export const PrimaryInput = (({ id = '', className = '', type = 'text', name = '', value, onChange, placeholder = '', autoComplete = 'on', label = '' }) => {
     // label size
     const [size, set] = useState(0);
     // label ref
     const ref = useRef();
+
+    console.dir(label);
 
     // componentDidUpdate: label. Obtenemos el tamaño del label para saber cuánto 'text-indent' dejar en el input
     useEffect(() => {
@@ -50,7 +53,7 @@ export const PrimaryInput = ({ id = '', className = '', type = 'text', name = ''
             {label !== '' && <label htmlFor={id} ref={ref}>{label}</label>}
         </StyledPrimaryInput>
     );
-}
+});
 
 export const PrimarySelect = ({ id = '', className = '', name = '', options = [], value, onChange, placeholder = '', label = '' }) => {
     // label size

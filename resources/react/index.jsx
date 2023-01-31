@@ -10,7 +10,7 @@ import { RoutinesProvider } from './contexts/RoutinesContext';
 
 import { GlobalStyle } from './styles/global';
 import App from './components/App';
-
+import './styles/fonts.css';
 
 const app = ReactDOMClient.createRoot(document.getElementById('root'));
 

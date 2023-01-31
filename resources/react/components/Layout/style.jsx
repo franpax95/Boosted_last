@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import styles from '../../styles';
-import { navbarHeight } from '../Navbar/style';
 
 const { media, transitionDuration } = styles;
 
@@ -8,9 +7,7 @@ export const StyledLayout = styled.div`
     width: 100%;
     height: 100%;
     max-height: 100%;
-    max-height: ${props => !!props.isNavbarVisible ? `calc(100% - ${navbarHeight})` : '100%'};
     margin-top: 0px;
-    margin-top: ${props => !!props.isNavbarVisible ? navbarHeight : '0px'};
 
     overflow-y: auto;
 

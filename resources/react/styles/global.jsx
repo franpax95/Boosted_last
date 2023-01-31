@@ -1,11 +1,10 @@
 import { createGlobalStyle } from 'styled-components';
-import theme from 'styled-theming';
-import styles from './index';
-import { THEME } from '../states/theming';
+import styles from './vars';
+import { memo } from 'react';
 
 // Deestructuring styles variables
-const { [THEME.LIGHT]: quaternaryLight, [THEME.DARK]: quaternaryDark } = styles.color.quaternary;
-const { transitionDuration } = styles;
+const { transitionDuration, color } = styles;
+const { quaternary } = color;
 
 export const GlobalStyle = createGlobalStyle`
     * {
@@ -18,6 +17,11 @@ export const GlobalStyle = createGlobalStyle`
         -webkit-tap-highlight-color: transparent;
 
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        font-family: 'Montserrat';
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Syncopate';
     }
 
     a {
@@ -43,10 +47,10 @@ export const GlobalStyle = createGlobalStyle`
         min-height: 100vh;
         width: 100%;
 
-        background-color: ${theme('mode', { [THEME.LIGHT]: quaternaryLight.default, [THEME.DARK]: quaternaryDark.default })};
+        background-color: ${quaternary.default};
 
         transition: background-color ${transitionDuration};
     }
 `;
 
-export default GlobalStyle;
+export default memo(GlobalStyle);
