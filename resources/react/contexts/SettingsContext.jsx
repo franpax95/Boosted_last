@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-
 import { ThemeProvider } from 'styled-components';
 import { THEME } from '../states/theming';
 import { LANG } from '../states/lang';
 import { deleteArrayElement, validateState } from '../utils';
-
 
 const SettingsContext = React.createContext([{}, () => {}]);
 

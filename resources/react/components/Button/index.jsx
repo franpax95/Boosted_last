@@ -1,13 +1,24 @@
 import React, { Suspense, useContext, lazy } from 'react';
 import { SettingsContext } from '../../contexts/SettingsContext';
 import { THEME } from '../../states/theming';
-import { StyledPrimaryButton, StyledSecondaryButton, StyledTertiaryButton, StyledBurgerButton, StyledSuccessButton, StyledDangerButton, StyledThemeToggle, StyledLanguageToggle } from './style';
+import { StyledPrimaryButton, StyledSecondaryButton, StyledTertiaryButton, StyledBurgerButton, StyledSuccessButton, StyledDangerButton, StyledThemeToggle, StyledLanguageToggle, StyledAnimatedButton } from './style';
 import { MdLightMode, MdNightlight } from 'react-icons/md';
 import { LANG } from '../../states/lang';
 
 const SvgSwitch = lazy(() => import('../SvgComponents/svg-switch'));
 const EnglandFlagSVG = lazy(() => import('../SvgComponents').then(module => ({ default: module.EnglandFlagSVG })));
 const SpainFlagSVG = lazy(() => import('../SvgComponents').then(module => ({ default: module.SpainFlagSVG })));
+
+export const AnimatedButton = ({ type, className = '', onClick, disabled, children }) => {
+    return <StyledAnimatedButton type={type} className={className} onClick={onClick} disabled={disabled}>
+        <span className="border"></span>
+        <span className="top"></span>
+        <span className="right"></span>
+        <span className="bottom"></span>
+        <span className="left"></span>
+        <span className="text">{children}</span>
+    </StyledAnimatedButton>;
+}
 
 export const PrimaryButton = ({ type, className = '', onClick, disabled, children }) => {
     return <StyledPrimaryButton type={type} className={className} onClick={onClick} disabled={disabled}>{ children }</StyledPrimaryButton>;

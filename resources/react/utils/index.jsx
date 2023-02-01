@@ -24,6 +24,26 @@ export const clone = original => {
 }
 
 /**
+ * Callback para comparar strings a la hora de ordenar arrays.
+ * Elimina las tildes y las ñs a la hora de ordenar. 
+ * Por defecto, devuelve la lista en orden descendente, a no ser que se especifique la variable 'asc' a true.
+ */
+export const compareStringArray = (a, b, asc) => {
+    const valueA = deleteAccents(a.replace(/ñ/g, "nZ").replace(/Ñ/g, "NZ")).toLowerCase();
+    const valueB = deleteAccents(b.replace(/ñ/g, "nZ").replace(/Ñ/g, "NZ")).toLowerCase();
+
+    if (valueA > valueB) {
+        return asc ? -1 : 1;
+    }
+
+    if (valueB > valueA) {
+        return asc ? 1 : -1;
+    }
+
+    return 0;
+}
+
+/**
  * Elimina los acentos de un texto
  */
 export const deleteAccents = text => text

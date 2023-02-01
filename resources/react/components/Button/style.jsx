@@ -7,6 +7,121 @@ import { addOpacityToHex, darken, lighten } from '../../styles/utils';
 const { color, font, media, transitionDuration } = styles;
 const { primary, secondary, tertiary, quaternary, success, danger } = color;
 
+export const StyledAnimatedButton = styled.button`
+    z-index: 1;
+    width: fit-content;
+    padding: 1.5rem 4rem;
+
+    position: relative;
+
+    display: block;
+
+    background-color: rgba(0, 0, 0, 0);
+    color: ${color.text};
+
+    font-size: ${font.md};
+    text-transform: uppercase;
+    text-align: center;
+
+    transition: color ${transitionDuration}, background-color ${transitionDuration};
+
+    & span {
+        z-index: 1;
+        position: absolute;
+        transition-property: all;
+        transition-duration: .2s;
+        transition-timing-function: ease-out;
+    }
+
+    & .border {
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        border: 1px solid ${primary.default};
+        background-color: rgba(0, 0, 0, 0);
+    }
+
+    & .top,
+    & .bottom,
+    & .left,
+    & .right {
+        height: 1px;
+        width: 0;
+        background-color: ${primary.default};
+    }
+
+    & .left,
+    & .right {
+        height: 0;
+        width: 1px;
+    }
+
+    & .top {
+        top: -5px;
+        left: -15px;
+    }
+
+    & .bottom {
+        bottom: -5px;
+        right: -15px;
+    }
+
+    & .left {
+        top: -15px;
+        right: -5px;
+    }
+
+    & .right {
+        bottom: -15px;
+        left: -5px;
+    }
+
+    &:hover {
+        .border {
+            background-color: ${theme('mode', { [THEME.LIGHT]: 'rgba(0, 0, 0, .1)', [THEME.DARK]: 'rgba(255, 255, 255, .1)' })};
+        }
+    }
+
+    &:hover .border {
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+    }
+
+    &:hover .top,
+    &:hover .bottom {
+        width: 230px;
+    }
+
+    &:hover .left,
+    &:hover .right {
+        height: 40px;
+    }
+
+    &:hover .top {
+        left: -5px;
+    }
+
+    &:hover .bottom {
+        right: -5px;
+    }
+
+    &:hover .left {
+        top: -5px;
+    }
+
+    &:hover .right {
+        bottom: -5px;
+    }
+
+    & .text {
+        position: relative;
+        letter-spacing: .03em;
+    }
+`;
+
 /**
  * Burger Button
  */
@@ -96,17 +211,14 @@ export const StyledBurgerButton = styled.button`
     }
 
     &:hover span {
-        /* background-color: ${quaternary.hover}; */
         background-color: ${theme('mode', { [THEME.LIGHT]: lighten(textLight, 35), [THEME.DARK]: darken(textDark, 40) })};
     }
 
     &:active span {
-        /* background-color: ${quaternary.active}; */
         background-color: ${theme('mode', { [THEME.LIGHT]: lighten(textLight, 50), [THEME.DARK]: darken(textDark, 60) })};
     }
 
     &:disabled span {
-        /* background-color: ${quaternary.disabled}; */
         background-color: ${theme('mode', { [THEME.LIGHT]: lighten(textLight, 80), [THEME.DARK]: darken(textDark, 80) })};
     }
 `;
@@ -225,10 +337,7 @@ export const StyledLanguageToggle = styled.div`
         padding: 0 6px;
     }
 
-    /* .knobs .square { background-color: ${theme('mode', { [THEME.LIGHT]: '#1F8A70', [THEME.DARK]: '#00337C' })} } */
     .knobs .square { background-color: #a6a6a6 }
-
-    /* .layer { background-color: ${theme('mode', { [THEME.LIGHT]: '#84D2C5', [THEME.DARK]: '#7B8FA1' })} } */
     .layer { background-color: lightgray }
 `;
 
@@ -240,8 +349,8 @@ export const StyledLanguageToggle = styled.div`
  */
 const btnCommonCSS = css`
     width: 100%;
-    max-width: 300px;
     height: 50px;
+    padding: 0 .5rem;
 
     position: relative;
 
@@ -251,30 +360,24 @@ const btnCommonCSS = css`
     justify-content: center;
     align-items: center;
 
-    border: none;
-    border-radius: 6px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0);
     color: ${color.text};
 
+    font-family: 'Syncopate';
     font-size: ${font.md};
+    font-weight: bold;
     text-align: center;
+    text-transform: uppercase;
 
-    transition: all ${transitionDuration};
+    transition: 
+        border-color ${transitionDuration}, 
+        background-color ${transitionDuration}, 
+        color ${transitionDuration}, 
+        font-size .1s;
 
-    @media (min-width: ${media.sm}px) {
-        width: auto;
-        width: fit-content;
-        max-width: initial;
-        padding: 0 1.5rem;
-    }
-
-    @media (min-width: ${media.md}px) {
-        padding: 0 2rem;
-        /* font-size: ${font.md}; */
-    }
-
-    @media (min-width: ${media.lg}px) {
-        padding: 0 3rem;
-        /* font-size: ${font.lg}; */
+    &:disabled {
+        cursor: not-allowed;
     }
 `;
 
@@ -282,18 +385,14 @@ export const PrimaryButtonCSS = css`
     ${btnCommonCSS};
 
     background-color: ${primary.default};
-    color: ${theme('mode', { [THEME.LIGHT]: quaternaryLight, [THEME.DARK]: textDark })};
+    color: ${quaternary.default};
 
     &:hover:not(:disabled) {
         background-color: ${primary.hover};
-        box-shadow: 0px 5px 10px 0px ${theme('mode', { [THEME.LIGHT]: addOpacityToHex(primaryLightHover, .3), [THEME.DARK]: addOpacityToHex(primaryDarkHover, .3) })};
-        transform: translateY(-1px);
     }
 
     &:active:not(:disabled) {
         background-color: ${primary.active};
-        box-shadow: 0px 5px 10px -5px ${theme('mode', { [THEME.LIGHT]: addOpacityToHex(primaryLightActive, .3), [THEME.DARK]: addOpacityToHex(primaryDarkActive, .3) })};
-        transform: translateY(1px);
     }
 
     &.disabled {
@@ -301,31 +400,32 @@ export const PrimaryButtonCSS = css`
     }
 
     &:disabled {
-        cursor: not-allowed;
         background-color: ${primary.disabled};
     }
 `;
 
 export const StyledPrimaryButton = styled.button`
     ${PrimaryButtonCSS};
-    font-weight: 500;
 `;
 
 export const SecondaryButtonCSS = css`
     ${btnCommonCSS};
 
-    background-color: ${secondary.default};
+    border: solid 1px ${primary.default};
+    border-radius: 1px;
+    background-color: rgba(0, 0, 0, 0);
+
+    font-family: 'Montserrat';
+    font-weight: 500;
+    text-transform: uppercase;
 
     &:hover:not(:disabled) {
-        background-color: ${secondary.hover};
-        box-shadow: 0px 5px 10px 0px ${theme('mode', { [THEME.LIGHT]: addOpacityToHex(secondaryLightHover, .3), [THEME.DARK]: addOpacityToHex(tertiaryDarkHover, .3) })};
-        transform: translateY(-1px);
+        border-color: ${primary.hover};
+        background-color: ${theme('mode', { [THEME.LIGHT]: 'rgba(0, 0, 0, .1)', [THEME.DARK]: 'rgba(255, 255, 255, .1)' })};
     }
 
     &:active:not(:disabled) {
         background-color: ${secondary.active};
-        box-shadow: 0px 5px 10px -5px ${theme('mode', { [THEME.LIGHT]: addOpacityToHex(secondaryLightActive, .3), [THEME.DARK]: addOpacityToHex(tertiaryDarkActive, .3) })};
-        transform: translateY(1px);
     }
 
     &.disabled {
@@ -333,7 +433,6 @@ export const SecondaryButtonCSS = css`
     }
 
     &:disabled {
-        cursor: not-allowed;
         background-color: ${secondary.disabled};
     }
 `;
@@ -349,14 +448,10 @@ export const TertiaryButtonCSS = css`
 
     &:hover:not(:disabled) {
         background-color: ${tertiary.hover};
-        box-shadow: 0px 5px 10px 0px ${theme('mode', { [THEME.LIGHT]: addOpacityToHex(tertiaryLightHover, .3), [THEME.DARK]: addOpacityToHex(secondaryDarkHover, .3) })};
-        transform: translateY(-1px);
     }
 
     &:active:not(:disabled) {
         background-color: ${tertiary.active};
-        box-shadow: 0px 5px 10px -5px ${theme('mode', { [THEME.LIGHT]: addOpacityToHex(tertiaryLightActive, .3), [THEME.DARK]: addOpacityToHex(secondaryDarkActive, .3) })};
-        transform: translateY(1px);
     }
 
     &.disabled {
@@ -364,7 +459,6 @@ export const TertiaryButtonCSS = css`
     }
 
     &:disabled {
-        cursor: not-allowed;
         background-color: ${tertiary.disabled};
     }
 `;
@@ -377,18 +471,14 @@ export const SuccessButtonCSS = css`
     ${btnCommonCSS};
 
     background-color: ${success.default};
-    color: ${textDark};
+    color: white;
     
     &:hover:not(:disabled) {
         background-color: ${success.hover};
-        box-shadow: 0px 5px 10px 0px ${addOpacityToHex(success.hover, .3)};
-        transform: translateY(-1px);
     }
 
     &:active:not(:disabled) {
         background-color: ${success.active};
-        box-shadow: 0px 5px 10px -5px ${addOpacityToHex(success.active, .3)};
-        transform: translateY(1px);
     }
 
     &.disabled {
@@ -396,7 +486,6 @@ export const SuccessButtonCSS = css`
     }
 
     &:disabled {
-        cursor: not-allowed;
         background-color: ${success.disabled};
     }
 `;
@@ -409,18 +498,14 @@ export const DangerButtonCSS = css`
     ${btnCommonCSS};
 
     background-color: ${danger.default};
-    color: ${textDark};
+    color: white;
 
     &:hover:not(:disabled) {
         background-color: ${danger.hover};
-        box-shadow: 0px 5px 10px 0px ${addOpacityToHex(danger.hover, .3)};
-        transform: translateY(-1px);
     }
 
     &:active:not(:disabled) {
         background-color: ${danger.active};
-        box-shadow: 0px 5px 10px -5px ${addOpacityToHex(danger.active, .3)};
-        transform: translateY(1px);
     }
 
     &.disabled {
@@ -428,7 +513,6 @@ export const DangerButtonCSS = css`
     }
 
     &:disabled {
-        cursor: not-allowed;
         background-color: ${danger.disabled};
     }
 `;

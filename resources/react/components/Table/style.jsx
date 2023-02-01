@@ -13,11 +13,27 @@ export const StyledCategoriesTable = styled.div`
     height: 100%;
     margin: 0 auto;
 
-    display: flex;
-    flex-direction: column;
-    /* gap: 1rem; */
-    justify-content: center;
-    align-items: center;
+    .body {
+        max-height: 50vh;
+        width: 100%;
+
+        display: flex;
+        flex-direction: column;
+        /* gap: 1rem; */
+        justify-content: center;
+        align-items: center;
+
+        overflow-y: auto;
+
+        /* width */
+        &::-webkit-scrollbar { width: 8px }
+        /* Track */
+        &::-webkit-scrollbar-track { background: ${secondary.default} }
+        /* Handle */
+        &::-webkit-scrollbar-thumb { background: ${primary.default} }
+        /* Handle on hover */
+        &::-webkit-scrollbar-thumb:hover { background: ${primary.hover} }
+    }
 
     .category {
         width: 100%;
@@ -39,14 +55,40 @@ export const StyledCategoriesTable = styled.div`
             color ${transitionDuration};
 
         &.header {
+            user-select: none;
             padding: 1rem;
             border-bottom: none;
             background-color: ${secondary.default};
 
-            div {
+            & > div {
+                display: flex;
+                gap: .25rem;
+                flex-direction: row;
+                justify-content: flex-start;
+                align-items: center;
+
                 cursor: pointer;
+
                 font-weight: bold;
                 letter-spacing: .5px;
+            }
+
+            .icon {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                opacity: 0;
+
+                transition: opacity .1s, transform ${transitionDuration};
+
+                &.active {
+                    opacity: 1;
+                }
+
+                &.reverse {
+                    transform: rotate(180deg);
+                }
             }
         }
 
@@ -63,11 +105,23 @@ export const StyledCategoriesTable = styled.div`
             display: none;
         }
 
+        .check {
+            .checkbox {
+                z-index: 2;
+            }
+        }
+
         @media (min-width: ${media.md}px) {
             .created_at,
             .updated_at {
                 display: block;
             }
+        }
+    }
+
+    &.selection-mode {
+        .category {
+            grid-template-columns: 50px minmax(250px, 1fr) minmax(175px, 1fr) minmax(175px, 1fr);
         }
     }
 `;

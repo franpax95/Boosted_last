@@ -91,9 +91,9 @@ export default function App(props) {
                         {/* <Route element={<Layout />}> */}
                             {/** Inicio/Home */}
                             <Route exact path="/" element={
-                                <RequireAuth>
+                                <Suspense>
                                     <Home />
-                                </RequireAuth>
+                                </Suspense>
                             } />
 
                             {/**

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { StyledCategoryToggle, StyledInput, StyledPrimaryFileInput, StyledPrimaryFileInputPreview, StyledPrimaryInput, StyledSearchBar } from './style';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { StyledCategoryToggle, StyledInput, StyledPrimaryCheckbox, StyledPrimaryFileInput, StyledPrimaryFileInputPreview, StyledPrimaryInput, StyledSearchBar } from './style';
 import { AiOutlineSearch, AiOutlineClose, AiFillFileImage } from 'react-icons/ai';
 import { clone, fileToBase64 } from '../../utils';
 import { MdAdsClick } from 'react-icons/md';
@@ -7,6 +7,8 @@ import { IoMdClose } from 'react-icons/io';
 import { config, useTransition } from 'react-spring';
 import { PrimaryButton } from '../Button';
 import { memo } from 'react';
+import { SettingsContext } from '../../contexts/SettingsContext';
+import { THEME } from '../../states/theming';
 
 
 export const Input = ({ id, className = '', type = 'text', name, value, onChange, placeholder, autoComplete = 'on' }) => (
@@ -27,8 +29,6 @@ export const PrimaryInput = (({ id = '', className = '', type = 'text', name = '
     const [size, set] = useState(0);
     // label ref
     const ref = useRef();
-
-    console.dir(label);
 
     // componentDidUpdate: label. Obtenemos el tamaño del label para saber cuánto 'text-indent' dejar en el input
     useEffect(() => {
@@ -383,5 +383,28 @@ export const CategoryToggle = ({ className = '', isNewCategory, setIsNewCategory
                 />
             </div>
         </StyledCategoryToggle>
+    );
+}
+
+export const PrimaryCheckbox = ({ value, onChange }) => {
+    /** Settings Context */
+    const { theme } = useContext(SettingsContext);
+
+    return (
+        <StyledPrimaryCheckbox>
+            <label className={`checkbox path ${theme === THEME.LIGHT ? '' : 'hide'}`}>
+                <input type="checkbox" checked={value} onChange={onChange} onClick={e => e.stopPropagation()} />
+                <svg viewBox="0 0 21 21">
+                    <path d="M5,10.75 L8.5,14.25 L19.4,2.3 C18.8333333,1.43333333 18.0333333,1 17,1 L4,1 C2.35,1 1,2.35 1,4 L1,17 C1,18.65 2.35,20 4,20 L17,20 C18.65,20 20,18.65 20,17 L20,7.99769186"></path>
+                </svg>
+            </label>
+
+            <label className={`checkbox bounce ${theme === THEME.DARK ? '' : 'hide'}`}>
+                <input type="checkbox" checked={value} onChange={onChange} onClick={e => e.stopPropagation()} />
+                <svg viewBox="0 0 21 21">
+                    <polyline points="5 10.75 8.5 14.25 16 6"></polyline>
+                </svg>
+            </label>
+        </StyledPrimaryCheckbox>
     );
 }

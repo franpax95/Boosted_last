@@ -1,5 +1,9 @@
 import styled from 'styled-components';
 import { animated } from 'react-spring';
+import styles from '../styles/vars';
+
+const { color, font, media, transitionDuration } = styles;
+const { primary, secondary, tertiary, quaternary } = color;
 
 /**
  * Styled Main App Component
@@ -35,4 +39,13 @@ export const AnimatedWrapper = styled(animated.div)`
     position: absolute;
 
     overflow-y: auto;
+
+    /* width */
+    &::-webkit-scrollbar { width: 15px }
+    /* Track */
+    &::-webkit-scrollbar-track { background: ${secondary.default} }
+    /* Handle */
+    &::-webkit-scrollbar-thumb { background: ${primary.default} }
+    /* Handle on hover */
+    &::-webkit-scrollbar-thumb:hover { background: ${primary.hover} }
 `;

@@ -11,10 +11,13 @@ const link_colors = ['#32a7e2', '#ff7551', '#6c5ecf', '#22b07d'];
 export const StyledSidebar = styled.nav`
     --td: .7s;      /** Transition Duration */
     --htd: .35s;    /** HALF Transition Duration */
-    --sidebar-width: 205px;
+    --sidebar-width: 250px;
+    @media (min-width: ${media.sm}px) { --sidebar-width: 300px; }
+
+    /* --sidebar-width: 205px;
     @media (min-width: ${media.sm}px) { --sidebar-width: 220px; }
     @media (min-width: ${media.md}px) { --sidebar-width: 250px; }
-    @media (min-width: ${media.lg}px) { --sidebar-width: 300px; }
+    @media (min-width: ${media.lg}px) { --sidebar-width: 300px; } */
 
     z-index: 200;
     width: 0px;
@@ -28,7 +31,7 @@ export const StyledSidebar = styled.nav`
 
     transition: width var(--td, .7s) ease-in-out;
 
-    @media (max-width: ${media.md}px) { 
+    @media (max-width: ${media.lg}px) { 
         position: absolute;
         right: 0;
         top: 0;
@@ -174,7 +177,7 @@ export const StyledSidebar = styled.nav`
         padding: 10px;
 
         position: absolute;
-        left: -5rem;
+        left: -6rem;
         top: 2rem;
 
         display: flex;
