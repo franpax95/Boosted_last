@@ -192,7 +192,7 @@ export const PrimaryFileInput = ({ id = '', className = '', name = '', value = '
         // onRest: () => setVisor(!showVisor)
     })
     
-    // useEffect(() => console.dir(value), [value]);
+    useEffect(() => console.dir(value), [value]);
 
     // Manejador de eventos 'change' del input file
     const onInputChange = async event => {
@@ -204,7 +204,8 @@ export const PrimaryFileInput = ({ id = '', className = '', name = '', value = '
             base64 = await fileToBase64(original);
             file.base64 = base64;
 
-            if(onChange) {
+            if (onChange) {
+                console.dir(file);
                 onChange(file);
                 event.target.value = '';
             }
@@ -216,7 +217,7 @@ export const PrimaryFileInput = ({ id = '', className = '', name = '', value = '
         event.preventDefault();
         event.stopPropagation();
 
-        if(onChange) {
+        if (onChange) {
             onChange('');
         }
 
@@ -236,7 +237,7 @@ export const PrimaryFileInput = ({ id = '', className = '', name = '', value = '
         event.preventDefault();
         event.stopPropagation();
 
-        if(fileRef.current) {
+        if (fileRef.current) {
             fileRef.current.click();
         }
     }
