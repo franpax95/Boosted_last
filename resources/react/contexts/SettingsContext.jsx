@@ -1,20 +1,69 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import { ThemeProvider } from 'styled-components';
-import { THEME } from '../states/theming';
 import { LANG } from '../states/lang';
-import { deleteArrayElement, validateState } from '../utils';
+import { STORAGE } from '../states/storage';
+import { THEME } from '../states/theming';
+import { clone, deleteArrayElement, getRandomArbitrary, validateState } from '../utils';
 
 const SettingsContext = React.createContext([{}, () => {}]);
 
 function SettingsProvider({ children }) {
+    /** Storage access */
+    const storage = {
+        get: key => {
+            if (validateState(STORAGE,key)) {
+                return localStorage.getItem(key);
+            }
+
+            return null;
+        },
+        set: (key, value) => {
+            if (validateState(STORAGE, key)) {
+                localStorage.setItem(key, value);
+            }
+        },
+        remove: key => {
+            if (validateState(STORAGE,key)) {
+                localStorage.removeItem(key);
+            }
+        }
+    };
+
     /** Tema actual de la aplicación (LIGHT / DARK) */
-    const [theme, setThemeState] = useState(localStorage.getItem('theme') || THEME.DARK);
+    const [theme, setThemeState] = useState(storage.get(STORAGE.THEME) || THEME.DARK);
     /** Lenguaje actual de la aplicación (ESP / ENG) */
-    const [lang, setLangState] = useState(localStorage.getItem('language') || LANG.ESP);
+    const [lang, setLangState] = useState(storage.get(STORAGE.LANGUAGE) || LANG.ESP);
     /** Muestra un spinner de carga a pantalla completa si está activo */
     const [loading, setLoadingState] = useState(false);
     /** Array con los modales */
     const [modals, setModals] = useState([]);
+
+    /**
+     * Función para devolver la configuración del toast
+     */
+    const toastConfig = ({ 
+        position = 'top-center', 
+        autoClose = 5000, 
+        hideProgressBar = false, 
+        closeOnClick = true,
+        pauseOnHover = true,
+        draggable = false,
+        progress = undefined,
+    } = {}) => {
+        const toastTheme = theme === THEME.DARK ? 'dark' : 'light';
+
+        return ({
+            position,
+            autoClose,
+            hideProgressBar,
+            closeOnClick,
+            pauseOnHover,
+            draggable,
+            progress,
+            theme: toastTheme
+        });
+    }
 
     /**
      * Cambia el tema de la aplicación por el pasado por parámetro, si es válido.
@@ -23,17 +72,17 @@ function SettingsProvider({ children }) {
      */
     function setTheme(newTheme) {
         // Si se pasa el tema a setear por parámetro y es válido...
-        if(newTheme && validateState(THEME, newTheme)) {
+        if (newTheme && validateState(THEME, newTheme)) {
             setThemeState(newTheme);
-            localStorage.setItem('theme', newTheme);
+            storage.set(STORAGE.THEME, newTheme);
         }
 
         // Si NO se pasa el tema a setear por parámetro...
-        else if(!newTheme) {
+        else if (!newTheme) {
             // Hacemos toggle
             const themeToSet = theme === THEME.LIGHT ? THEME.DARK : THEME.LIGHT;
             setThemeState(themeToSet);
-            localStorage.setItem('theme', themeToSet);
+            storage.set(STORAGE.THEME, themeToSet);
         }
     }
 
@@ -44,9 +93,9 @@ function SettingsProvider({ children }) {
      */
     function setLang(newLang) {
         // Si se pasa el lenguaje por parámetro y es válido...
-        if(newLang && validateState(LANG, newLang)) {
+        if (newLang && validateState(LANG, newLang)) {
             setLangState(newLang);
-            localStorage.setItem('language', newLang);
+            storage.set(STORAGE.LANGUAGE, newLang);
         }
 
         // Si NO se pasa el tema a setear por parámetro...
@@ -54,7 +103,7 @@ function SettingsProvider({ children }) {
             // Hacemos toggle
             const langToSet = lang === LANG.ESP ? LANG.ENG : LANG.ESP;
             setLangState(langToSet);
-            localStorage.setItem('language', langToSet);
+            storage.set(STORAGE.LANGUAGE, langToSet);
         }
     }
 
@@ -68,35 +117,71 @@ function SettingsProvider({ children }) {
     }
 
     /**
-     * Abre un modal
+     * Open a modal.
      */
-    function openModal({ title, content, onAccept, onCancel }) {
-        console.dir(content);
-        if(Array.isArray(content)) {
-            setModals(prev => [...prev, { title, content, onAccept, onCancel }]);
+    function openModal({ title, content, onAccept, onCancel, align }) {
+        let id = getRandomArbitrary(1, 100000);
+        while (modals.some(modal => modal.id === id)) {
+            id = getRandomArbitrary(1, 100000);
+        }
+
+        if (Array.isArray(content)) {
+            setModals(prev => [...prev, { id, title, content, onAccept, onCancel, closeAnimation: false, align }]);
         }
     }
 
-    /** 
-     * Cierra el último modal abierto, en caso de haber más de uno
+    /**
+     * Fire close animation of a modal. 
+     * Internally, when the animation ends, the modal is destroyed.
      */
-    function closeModal() {
-        setModals(prev => prev.length ? deleteArrayElement(prev, prev.length - 1) : prev);
+    function closeModal(id) {
+        setModals(prev => {
+            if (prev.length === 0) {
+                return [];
+            } 
+
+            const pos = prev.some(modal => modal.id === id) ? prev.findIndex(modal => modal.id === id) : prev.length - 1;
+            let currentModals = [...prev];
+            currentModals[pos].closeAnimation = true;
+            return currentModals;
+        });
+
+        setTimeout(() => destroyModal(id), 500);
     }
 
     /** 
-     * Cierra todos los mdoales abiertos
+     * Close all opened modals.
      */
     function closeAllModal() {
-        setModals([]);
+        setModals(prev => prev.map(modal => ({ ...modal, closeAnimation: true })));
+        setTimeout(() => setModals([]), 500);
+    }
+
+    /** 
+     * Close a modal based on the id passed as argument.
+     * If no id specified, close the last modal opened.
+     */
+    function destroyModal(id) {
+        setModals(prev => {
+            if (prev.length === 0) {
+                return [];
+            } 
+
+            const pos = prev.some(modal => modal.id === id) ? prev.findIndex(modal => modal.id === id) : prev.length - 1;
+            return deleteArrayElement(prev, pos);
+        });
     }
 
     /**
      * Variables, estados y funciones a exportar en el contexto
      */
     const value = {
-        theme, setTheme, lang, setLang, loading, setLoading,
+        storage,
+        theme, setTheme, 
+        lang, setLang, 
+        loading, setLoading,
         modals, openModal, closeModal, closeAllModal,
+        toastConfig, 
     };
 
     return (

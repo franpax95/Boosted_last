@@ -78,7 +78,7 @@ export const StyledPrimaryInput = styled.span`
             overflow: hidden;
             border-top-left-radius: 3px;
             border-bottom-left-radius: 3px;
-            color: inherit;
+            color: white;
 
             text-shadow: 0 1px 0 rgba(19, 74, 70, .4);
 

@@ -1,25 +1,23 @@
 import React, { useContext, useState } from 'react';
-import axios from 'axios';
 import { toast } from 'react-toastify';
-import { clone } from '../utils';
 import { SettingsContext } from './SettingsContext';
-import { UserContext } from './UserContext';
-import { THEME } from '../states/theming';
-
+import { FetchingContext } from './FetchContext';
+import useLanguage from '../hooks/useLanguage';
+import { getPromise } from '../utils';
 
 const ExercisesContext = React.createContext([{}, () => {}]);
 
 function ExercisesProvider({ children }) {
+    /** Language */
+    const { contexts: { Exercises: texts }} = useLanguage();
+    /** Requests */
+    const { request, token } = useContext(FetchingContext);
     /** Settings */
-    const { setLoading, theme } = useContext(SettingsContext);
-    /** Auth */
-    const { token } = useContext(UserContext);
-
+    const { setLoading, theme, toastConfig } = useContext(SettingsContext);
     /** Ejercicios cargados en la aplicación */
     const [exercises, setExercisesState] = useState(null);
     /** Ejercicio cargado en la aplicación (para ver detalles de un ejercicio o editarlo) */
     const [exercise, setExerciseState] = useState(null);
-
 
     /**
      * Parsea las variables opcionales del ejercicio para corregir los null que llegan en la llamada
@@ -31,339 +29,205 @@ function ExercisesProvider({ children }) {
     });
 
     /**
-     * Consulta los ejercicios disponibles para el usuario y las setea en la aplicación, si no estuvieran.
-     * Devuelve una copia de los ejercicios cargados en la aplicación.
+     * Consult the exercises available to the user and set them in the application, if they were not.
+     * Returns a copy of the exercises loaded in the application.
      */
     async function fetchExercises({ loading: haveLoading = true, toast: haveToast = true } = {}) {
-        if(haveLoading) {
-            setLoading(true);
-        }
-
-        const config = {
-            headers: { 
-                "Content-Type": "application/json", 
-                "Accept": "application/json",
-                "Authorization": `Bearer ${token}`
-            }
-        };
-
-        const cs = await axios.get('/api/exercises', config)
-            .then(response => {
-                console.dir(response);
-
-                const { exercises } = response.data;
-                const parsedExercises = exercises.map(exercise => parseExercise(exercise));
-                setExercisesState(parsedExercises);
-                return parsedExercises;
+        const data = await request('GET', '/api/exercises', { haveLoading, failToast: haveToast ? '' : null })
+            .then(data => {
+                const { exercises } = data;
+                setExercisesState(exercises.map(exercise => parseExercise(exercise)));
+                return exercises;
             })
             .catch(error => {
-                console.error(error);
-
-                if(haveToast) {
-                    toast.error(error.response.data.message, {
-                        position: "top-center",
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: false,
-                        progress: undefined,
-                        theme: theme === THEME.DARK ? 'dark' : 'light'
-                    });
-                }
-
                 setExercisesState([]);
                 return [];
             });
 
-        if(haveLoading) {
-            setLoading(false);
-        }
-
-        return cs;
+        return data;
     }
 
     /**
-     * Devuelve un ejercicio según el id pasado por parámetro, o null si no se encuentra.
-     * Si se especifica force a true, realiza la llamada independientemente del valor de category.
+     * Returns an exercise based on the id passed by parameter, or null if it is not among the exercises available to the user.
+     * If force to true is specified, make the call regardless of the value.
      */
     async function fetchExercise({ id, force = false, loading: haveLoading = true, toast: haveToast = true } = {}) {
-        // Pedimos ejercicio si no hay seteado o si el que hay seteado no es el que se está pidiendo
-        if(force === true || exercise === null || (exercise !== null && exercise.id !== id)) {
-            if(haveLoading) {
-                setLoading(true);
-            }
-
-            const config = {
-                headers: { 
-                    "Content-Type": "application/json", 
-                    "Accept": "application/json",
-                    "Authorization": `Bearer ${token}`
-                }
-            };
-
-            const ex = await axios.get(`/api/exercises/${id}`, config)
-                .then(response => {
-                    console.dir(response);
-
-                    const { exercise } = response.data;
-                    const parsedExercise = parseExercise(exercise);
-                    setExerciseState(parsedExercise);
-                    return parsedExercise;
+        if (force === true || exercise === null || (exercise !== null && exercise.id !== id)) {
+            const data = await request('GET', `/api/exercises/${id}`, { haveLoading, failToast: haveToast ? '' : null })
+                .then(data => {
+                    const { exercise } = data;
+                    setExerciseState(parseExercise(exercise));
+                    return exercise;
                 })
                 .catch(error => {
-                    console.error(error);
-
-                    if(haveToast) {
-                        toast.error(error.response.data.message, {
-                            position: "top-center",
-                            hideProgressBar: false,
-                            closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: false,
-                            progress: undefined,
-                            theme: theme === THEME.DARK ? 'dark' : 'light'
-                        });
-                    }
-
                     setExerciseState(null);
                     return null;
                 });
 
-            if(haveLoading) {
-                setLoading(false);
-            }
-
-            return ex;
+            return data;
         }
 
         return exercise;
     }
 
     /**
-     * Inserta un ejercicio. Si se inserta correctamente, vuelve a pedir los ejercicios.
-     * Devuelve true o false indicando si la inserción ha tenido éxito.
+     * Insert an exercise. If inserted correctly, it asks for the exercises again.
+     * Returns true or false indicating whether the insert was successful.
      */
     async function insertExercise({ exercise, loading: haveLoading = true, toast: haveToast = true } = {}) {
-        if(haveLoading) {
-            setLoading(true);
-        }
-
-        const config = {
-            headers: { 
-                "Content-Type": "application/json", 
-                "Accept": "application/json",
-                "Authorization": `Bearer ${token}`
-            }
-        };
-
-        const ex = await axios.post('/api/exercises', exercise, config)
-            .then(res => {
-                console.dir(res);
-
-                const { exercise } = res.data;
-
-                if(haveToast) {
-                    toast.success('Ejercicio insertado con éxito', {
-                        position: "top-center",
-                        autoClose: 5000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: false,
-                        progress: undefined,
-                        theme: theme === THEME.DARK ? 'dark' : 'light'
-                    });
-                }
-
-                return exercise;
-            })
-            .catch(err => {
-                console.error(err);
-
-                if(haveToast) {
-                    toast.error('No se ha podido insertar el ejercicio', {
-                        position: "top-center",
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: false,
-                        progress: undefined,
-                        theme: theme === THEME.DARK ? 'dark' : 'light'
-                    });
-                }
-                
-                return null;
-            });
+        const successMessage = texts.txt1;
+        const errorMessage = texts.txt2;
         
-        // Si se ha insertado correctamente, volvemos a pedir los ejercicios
-        if(ex !== null) {
-            await fetchExercises({ loading: false });
-        }
+        if (haveLoading) setLoading(true);
 
-        if(haveLoading) {
-            setLoading(false);
-        }
+        const data = await request('POST', '/api/exercises', { 
+                body: exercise, 
+                haveLoading: false, 
+                successToast: haveToast ? successMessage : null, 
+                failToast: haveToast ? errorMessage : null 
+            })
+            .then(data => data.exercise)
+            .catch(error => null);
 
-        return ex;
+        if (data) await fetchExercises({ loading: false });
+        if (haveLoading) setLoading(false);
+
+        return data;
     }
 
     /**
-     * Edita un ejercicio. Si se edita correctamente, vuelve a pedir el ejercicio.
-     * Devuelve true o false indicando si la edición ha tenido éxito.
+     * Edit an exercise. If edited successfully, it asks for the exercise again.
+     * Returns true or false indicating whether the edit was successful.
      */
     async function updateExercise({ exercise, loading: haveLoading = true, toast: haveToast = true } = {}) {
-        const showErrorToast = () => {
-            toast.error('No se ha podido editar el ejercicio. Inténtelo de nuevo más tarde.', {
-                position: "top-center",
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: false,
-                progress: undefined,
-                theme: theme === THEME.DARK ? 'dark' : 'light'
-            });
-        }
+        const successMessage = texts.txt3;
+        const errorMessage = texts.txt4;
+        const showErrorToast = () => toast.error(errorMessage, toastConfig());
 
-        // Comprobamos que se ha seteado un id correcto en el ejercicio
-        if(typeof exercise.id !== "number") {
-            console.error("INTENTANDO EDITAR UN EJERCICIO SIN ID");
-            if(haveToast) {
-                showErrorToast();
-            }
+        // Check category
+        if (typeof exercise.id !== 'number') {
+            console.error('Bad Exercise.');
+            if (haveToast) showErrorToast();
             return false;
         }   
 
-        if(haveLoading) {
-            setLoading(true);
-        }
+        if (haveLoading) setLoading(true);
 
-        const config = {
-            headers: { 
-                "Content-Type": "application/json", 
-                "Accept": "application/json",
-                "Authorization": `Bearer ${token}`
-            }
-        };
+        const editted = await request('PUT', `/api/exercises/${exercise.id}`, { 
+            body: exercise, 
+            haveLoading: false, 
+            successToast: haveToast ? successMessage : null, 
+            failToast: haveToast ? errorMessage : null 
+        })
+            .then(data => true)
+            .catch(error => false);
 
-        const edited = await axios.put(`/api/exercises/${exercise.id}`, exercise, config)
-            .then(res => {
-                console.dir(res);
+        if (editted) await refresh();
+        if (haveLoading) setLoading(false);
 
-                if(haveToast) {
-                    toast.success('Ejercicio editado con éxito', {
-                        position: "top-center",
-                        autoClose: 5000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: false,
-                        progress: undefined,
-                        theme: theme === THEME.DARK ? 'dark' : 'light'
-                    });
-                }
-
-                return true;
-            })
-            .catch(err => {
-                console.error(err);
-                if(haveToast) {
-                    showErrorToast();
-                }
-                return false;
-            });
-        
-        // Si se ha editado correctamente, volvemos a pedir el ejercicio
-        if(edited) {
-            fetchExercises({ force: true, loading: false, haveToast: false });
-            await fetchExercise({ id: exercise.id, force: true, loading: false, haveToast: false });
-        }
-
-        if(haveLoading) {
-            setLoading(false);
-        }
-
-        return edited;
+        return editted;
     }
 
     /**
-     * Elimina un ejercicio. Si se elimina correctamente, vuelve a pedir los ejercicios.
-     * Devuelve true o false indicando si el borrado ha tenido éxito.
+     * Delete an exercise. If it is removed successfully, it asks for the exercises again.
+     * Returns true or false indicating whether the deletion was successful.
      */
     async function deleteExercise({ id, loading: haveLoading = true, toast: haveToast = true } = {}) {
-        const showErrorToast = () => {
-            toast.error('No se ha podido eliminar el ejercicio. Inténtelo de nuevo más tarde.', {
-                position: "top-center",
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: false,
-                progress: undefined,
-                theme: theme === THEME.DARK ? 'dark' : 'light'
-            });
-        }
+        const successMessage = texts.txt5;
+        const errorMessage = texts.txt6;
+        const showErrorToast = () => toast.error(errorMessage, toastConfig());
 
-        // Comprobamos que se ha pasado un id correcto por parámetro
-        if(typeof id !== "number") {
-            console.error("ID PASADO POR PARÁMETRO INCORRECTO. NO SE ELIMINA EL EJERCICIO.");
-            if(haveToast) {
-                showErrorToast();
-            }
+        // Check category id
+        if (typeof id !== 'number') {
+            console.error('Bad Exercise Id.');
+            if (haveToast) showErrorToast();
             return false;
         } 
 
-        if(haveLoading) {
-            setLoading(true);
-        }
+        if (haveLoading) setLoading(true);
 
-        const config = {
-            headers: { 
-                "Content-Type": "application/json", 
-                "Accept": "application/json",
-                "Authorization": `Bearer ${token}`
-            }
-        };
+        const deleted = await request('DELETE', `/api/exercises/${id}`, { 
+            haveLoading: false, 
+            successToast: haveToast ? successMessage : null, 
+            failToast: haveToast ? errorMessage : null 
+        })
+            .then(data => true)
+            .catch(error => false);
 
-        const deleted = await axios.delete(`/api/exercises/${id}`, config)
-            .then(res => {
-                console.dir(res);
-
-                if(haveToast) {
-                    toast.success('Ejercicio eliminado con éxito', {
-                        position: "top-center",
-                        autoClose: 5000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: false,
-                        progress: undefined,
-                        theme: theme === THEME.DARK ? 'dark' : 'light'
-                    });
-                }
-
-                return true;
-            })
-            .catch(err => {
-                console.error(err);
-                if(haveToast) {
-                    showErrorToast();
-                }
-                return false;
-            });
-
-        // Si se ha editado correctamente, volvemos a pedir los ejercicios
-        if(deleted) {
-            await fetchExercises({ loading: false });
-        }
-
-        if(haveLoading) {
-            setLoading(false);
-        }
+        if (deleted) await refresh();
+        if (haveLoading) setLoading(false);
         
         return deleted;
     }
 
+    /**
+     * Delete a group of exercises. If it is removed successfully, it asks for the exercises again.
+     * Returns true or false indicating whether the deletion was successful.
+     */
+    async function deleteExercises({ exercises, loading: haveLoading = true, toast: haveToast = true } = {}) {
+        const successMessage = texts.txt7;
+        const errorMessage = texts.txt8;
+        const showErrorToast = () => toast.error(errorMessage, toastConfig());
+
+        // Check exercise id
+        if (exercises.some(id => typeof id !== 'number')) {
+            console.error('Bad Exercises Ids.');
+            if (haveToast) showErrorToast();
+            return false;
+        } 
+
+        if (haveLoading) setLoading(true);
+
+        const deleted = await request('DELETE', `/api/exercises`, { 
+            body: { exercises },
+            haveLoading: false, 
+            successToast: haveToast ? successMessage : null, 
+            failToast: haveToast ? errorMessage : null 
+        })
+            .then(data => true)
+            .catch(error => false);
+
+        if (deleted) await refresh();
+        if (haveLoading) setLoading(false);
+        
+        return deleted;
+    }
+
+    /**
+     * Refresh the data loaded in the context
+     */
+    async function refresh() {
+        let promises = [];
+
+        if (exercises !== null) {
+            const [exercisesProm, exercisesResolve, exercisesReject] = getPromise();
+            promises.push(exercisesProm);
+
+            fetchExercises({ loading: false, toast: false })
+                .then(exs => exercisesResolve())
+                .catch(exs => exercisesReject());
+        }
+
+        if (exercise !== null) {
+            const [exerciseProm, exerciseResolve, exerciseReject] = getPromise();
+            promises.push(exerciseProm);
+
+            fetchExercise({ loading: false, toast: false, force: true, id: exercise.id })
+                .then(ex => exerciseResolve())
+                .catch(ex => exerciseReject());
+        }
+
+        await Promise.all(promises).then(values => {
+            console.dir(values);
+        });
+    }
+
     const value = {
-        exercises, exercise, fetchExercises, fetchExercise, insertExercise, updateExercise, deleteExercise
+        exercises, exercise, 
+        fetchExercises, fetchExercise, 
+        insertExercise, updateExercise, 
+        deleteExercise, deleteExercises,
+        refresh,
     };
 
     return <ExercisesContext.Provider value={value}>{children}</ExercisesContext.Provider>;

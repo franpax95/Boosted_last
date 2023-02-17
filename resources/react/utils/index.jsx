@@ -20,6 +20,7 @@ export const beautifyDate = str => {
  * @returns          copia del objeto
  */
 export const clone = original => {
+    return structuredClone(original);
     return JSON.parse(JSON.stringify(original));
 }
 

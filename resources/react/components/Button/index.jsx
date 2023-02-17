@@ -32,7 +32,7 @@ export const TertiaryButton = ({ type, className = '', onClick, disabled, childr
     return <StyledTertiaryButton type={type} className={className} onClick={onClick} disabled={disabled}>{ children }</StyledTertiaryButton>;
 }
 
-export const SuccessButton = ({ type,className = '', onClick, disabled, children }) => {
+export const SuccessButton = ({ type, className = '', onClick, disabled, children }) => {
     return <StyledSuccessButton type={type} className={className} onClick={onClick} disabled={disabled}>{ children }</StyledSuccessButton>;
 }
 

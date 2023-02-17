@@ -132,6 +132,29 @@ class ExerciseController extends Controller
             return response()->json(['error' => 'The exercise does not exist'], 404);
         }
 
-        return response()->json(null, 204);
+        return response()->json(null, 200);
+    }
+
+    /**
+     * Remove a resource collection from storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function remove(Request $request)
+    {
+        $notDeleted = [];
+        $exercises = json_decode($request->exercises);
+
+        foreach ($exercises as $id) {
+            try {
+                $exercise = Exercise::findOrFail($id);
+                $exercise->delete();
+            } catch (ModelNotFoundException $e) {
+                array_push($notDeleted, $id);
+            }
+        }
+
+        return response()->json($notDeleted, 200);
     }
 }

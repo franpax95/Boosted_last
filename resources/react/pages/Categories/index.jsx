@@ -16,21 +16,21 @@ const ImageBackground = lazy(() => import('../../components/Background').then(mo
 
 export default function Categories() {
     /** Categories Context */
-    const { categories, fetchCategories } = useContext(CategoriesContext);
+    const { categories, fetchCategories, deleteCategories } = useContext(CategoriesContext);
     /** Settings Context */
-    const { openModal, closeModal } = useContext(SettingsContext);
-    /** Valor del campo búsqueda sobre el que filtrar categorías */
-    const [search, setSearch] = useState('');
-    /** Categorías a mostrar, después de ser aplicados los filtros */
-    const [filteredCategories, setFilteredCategories] = useState([]);
-    /** Categorías seleccionadas */
-    const [selectedCategories, setSelectedCategories] = useState([]);
-    /** Oculta la pantalla. Útil sobretodo para esperar al fetch inicial. */
-    const [hide, setHide] = useState(true);
+    const { openModal } = useContext(SettingsContext);
     /** Language */
     const { pages: { Categories: texts }} = useLanguage();
+    /** Searchbar input controller */
+    const [search, setSearch] = useState('');
+    /** Categories to see in the table */
+    const [filteredCategories, setFilteredCategories] = useState([]);
+    /** Selected categories (to delete) */
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    /** Hide the screen until the initial fetching is over */
+    const [hide, setHide] = useState(true);
 
-    // componentDidMount. Trae las categorías al componente.
+    // componentDidMount. Fetch categories into application
     useEffect(() => {
         const fetch = async () => {
             if (categories === null) {
@@ -39,17 +39,17 @@ export default function Categories() {
 
             setHide(false);
         }
-        
+
         fetch();
     }, []);
 
-    // componentDidUpdate. Actualiza las categorías mostradas si cambian las categories.
+    // componentDidUpdate. Update filtered categories when categories change.
     useEffect(() => {
-        const cats = categories ? clone(categories) : [];
+        const cats = categories || [];
         setFilteredCategories(applyFilters(cats));
     }, [categories, search]);
 
-    // Devuelve las categorías pasadas por parámetro que cumplan con los filtros de la aplicación.
+    // Return the filtered categories based on the value of the filters (only search this time)
     const applyFilters = cats => {
         let cs = clone(cats);
 
@@ -60,24 +60,37 @@ export default function Categories() {
         return cs;
     }
 
-    // Elimina las categorías seleccionadas
-    const onDelete = e => {
+    /**
+     * 'Click' event handler for delete button.
+     * asks confirmation, then delete the selected categories.
+     */
+    const onDeleteClick = e => {
         if (selectedCategories.length === 0) {
             openModal({
-                title: 'Atención',
-                content: ['No has seleccionado ninguna categoría'],
-                onAccept: () => closeModal()
+                title: texts.txt11,
+                content: [texts.txt12]
             });
         } else {
             openModal({
-                title: 'Atención',
-                content: ['Función no implementada todavía...'],
-                onAccept: () => closeModal()
+                title: texts.txt11,
+                content: [texts.txt13],
+                onAccept: () => {
+                    deleteCategories({ categories: selectedCategories })
+                        .then(deleted => {
+                            if (deleted) {
+                                setSelectedCategories([]);
+                            }
+                        });
+                },
+                onCancel: () => {}
             });
         }
     }
 
-    // Actualiza las categorías seleccionadas
+    /**
+     * 'Change' event handler when a category is marked/unmarked. 
+     * Update the selected categories.
+     */
     const onSelectedChange = id => {
         setSelectedCategories(prev => {
             let selected = clone(prev);
@@ -93,7 +106,7 @@ export default function Categories() {
         });
     }
 
-    // Oculta la pantalla principal
+    // Hide the section
     if (hide) {
         return '';
     }
@@ -151,11 +164,13 @@ export default function Categories() {
 
                 <div className="buttons">
                     <PrimaryLink to="/categories/add">{texts.txt1}</PrimaryLink>
-                    <DangerButton onClick={onDelete} disabled={selectedCategories.length === 0}>{texts.txt7}</DangerButton>
+                    <DangerButton onClick={onDeleteClick} disabled={selectedCategories.length === 0}>{texts.txt7}</DangerButton>
                 </div>
 
                 {categories && categories.length > 0 && (
-                    <CategoriesTable categories={filteredCategories} selectionMode={true} onSelectedChange={onSelectedChange} />
+                    <div className="table">
+                        <CategoriesTable categories={filteredCategories} selectionMode={true} onSelectedChange={onSelectedChange} />
+                    </div>
                 )}
 
                 {categories && categories.length > 0 && filteredCategories.length === 0 && (

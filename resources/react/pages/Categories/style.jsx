@@ -186,6 +186,10 @@ export const StyledCategories = styled.section`
             gap: 1rem;
         }
     }
+
+    .table {
+        min-height: 60vh;
+    }
 `;
 
 export const StyledNotFoundCategories = styled.div`

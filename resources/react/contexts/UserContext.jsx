@@ -1,29 +1,27 @@
 import React, { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { SettingsContext } from './SettingsContext';
-import { clone } from '../utils';
 import { toast } from 'react-toastify';
 import { THEME } from '../states/theming';
 import md5 from 'md5';
-
+import { FetchingContext } from './FetchContext';
+import { STORAGE } from '../states/storage';
 
 const UserContext = React.createContext([{}, () => {}]);
 
 function UserProvider({ children }) {
     /** Settings */
-    const { setLoading, theme } = useContext(SettingsContext);
-
+    const { storage, setLoading, theme } = useContext(SettingsContext);
+    /** Token recibido durante el login para intercambiar con el servidor */
+    const { token, setToken } = useContext(FetchingContext); 
     /** Información del usuario cargada en la aplicación */
     const [user, setUser] = useState(null);
     /** Indica si el usuario está actualmente autenticado en la aplicación */
     const [isAuth, setIsAuth] = useState(null);
-    /** Token recibido durante el login para intercambiar con el servidor */
-    const [token, setToken] = useState(null);
-
 
     /** Efecto que actualiza la información de sesión guardada cuando se actualizan las variables token o user */
     useEffect(() => {
-        if(user !== null && token !== null) {
+        if (user !== null && token !== null) {
             saveSession();
         } else {
             removeSession();
@@ -34,10 +32,10 @@ function UserProvider({ children }) {
      * Comprueba si hay sesión almacenada y la recupera
      */
     function checkSession() {
-        const sessionToken = localStorage.getItem('token');
-        const sessionUser = localStorage.getItem('user');
+        const sessionToken = storage.get(STORAGE.TOKEN);
+        const sessionUser = storage.get(STORAGE.USER);
 
-        if(sessionToken !== null && sessionUser !== null) {
+        if (sessionToken !== null && sessionUser !== null) {
             setToken(sessionToken);
             setUser(JSON.parse(sessionUser));
             setIsAuth(true);
@@ -50,9 +48,9 @@ function UserProvider({ children }) {
      * Guarda la sesión 
      */
     function saveSession() {
-        if(user !== null && token !== null) {
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
+        if (user !== null && token !== null) {
+            storage.set(STORAGE.TOKEN, token);
+            storage.set(STORAGE.USER, JSON.stringify(user));
         }
     }
 
@@ -60,8 +58,8 @@ function UserProvider({ children }) {
      * Elimina la sesión
      */
     function removeSession() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        storage.remove(STORAGE.TOKEN);
+        storage.remove(STORAGE.USER);
     }
 
     /**

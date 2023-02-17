@@ -44,6 +44,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('categories',  [CategoryController::class, 'store']);
     Route::put('categories/{id}', [CategoryController::class, 'update']);
     Route::delete('categories/{id}', [CategoryController::class, 'destroy']);
+    Route::delete('categories', [CategoryController::class, 'remove']);
 
     // Exercises
     Route::get('exercises', [ExerciseController::class, 'index']);
@@ -51,6 +52,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('exercises',  [ExerciseController::class, 'store']);
     Route::put('exercises/{id}', [ExerciseController::class, 'update']);
     Route::delete('exercises/{id}', [ExerciseController::class, 'destroy']);
+    Route::delete('exercises', [ExerciseController::class, 'remove']);
 
     // Routines
     Route::get('routines', [RoutineController::class, 'index']);

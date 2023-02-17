@@ -11,23 +11,26 @@ import { RoutinesProvider } from './contexts/RoutinesContext';
 import { GlobalStyle } from './styles/global';
 import App from './components/App';
 import './styles/fonts.css';
+import { FetchingProvider } from './contexts/FetchContext';
 
 const app = ReactDOMClient.createRoot(document.getElementById('root'));
 
 // Kaaaameeee, haaaaaa meeee.....
 app.render(
     <SettingsProvider>
-        <UserProvider>
-            <CategoriesProvider>
-                <ExercisesProvider>
-                    <RoutinesProvider>
-                        <BrowserRouter>
-                            <GlobalStyle />
-                            <App />
-                        </BrowserRouter>
-                    </RoutinesProvider>
-                </ExercisesProvider>
-            </CategoriesProvider>
-        </UserProvider>
+        <FetchingProvider>
+            <UserProvider>
+                <CategoriesProvider>
+                    <ExercisesProvider>
+                        <RoutinesProvider>
+                            <BrowserRouter>
+                                <GlobalStyle />
+                                <App />
+                            </BrowserRouter>
+                        </RoutinesProvider>
+                    </ExercisesProvider>
+                </CategoriesProvider>
+            </UserProvider>
+        </FetchingProvider>
     </SettingsProvider>
 );

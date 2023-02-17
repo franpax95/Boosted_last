@@ -1,5 +1,6 @@
 export default {
 
-    /** Insertar aquí variables relacionadas con la configuración del proyecto */
+    /** Time (in ms) to timeout a response */
+    timeout: 3000,
 
 };

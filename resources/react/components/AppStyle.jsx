@@ -40,6 +40,10 @@ export const AnimatedWrapper = styled(animated.div)`
 
     overflow-y: auto;
 
+    /** background-color here for modal animations. If you remove this from here it will blink the background with a white one. */
+    background-color: ${quaternary.default};
+    transition: background-color ${transitionDuration};
+
     /* width */
     &::-webkit-scrollbar { width: 15px }
     /* Track */

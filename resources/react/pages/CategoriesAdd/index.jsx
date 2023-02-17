@@ -1,33 +1,40 @@
 import React, { useContext, useState, Suspense, lazy } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router';
-import { AiOutlineClose } from 'react-icons/ai';
+import useLanguage from '../../hooks/useLanguage';
+import { StyledCategoriesAdd } from './style';
+import { clone, deleteArrayElement } from '../../utils';
+import { AiFillSave, AiOutlineClose } from 'react-icons/ai';
+import { IoMdAddCircle } from 'react-icons/io';
+import { MdOutlineClearAll } from 'react-icons/md';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
 import { SettingsContext } from '../../contexts/SettingsContext';
-import { StyledCategoriesAdd } from './style';
-import { THEME } from '../../states/theming';
-import { clone, deleteArrayElement, getPromise } from '../../utils';
-import { ScreenSpinner } from '../../components/Spinner';
 
 const PrimaryButton = lazy(() => import('../../components/Button').then(module => ({ default: module.PrimaryButton })));
 const SecondaryButton = lazy(() => import('../../components/Button').then(module => ({ default: module.SecondaryButton })));
+const SuccessButton = lazy(() => import('../../components/Button').then(module => ({ default: module.SuccessButton })));
 const PrimaryInput = lazy(() => import('../../components/Input').then(module => ({ default: module.PrimaryInput })));
+const GradientBackground = lazy(() => import('../../components/Background').then(module => ({ default: module.GradientBackground })));
+const ScreenSpinner = lazy(() => import('../../components/Spinner').then(module => ({ default: module.ScreenSpinner })));
 
 export default function CategoriesAdd() {
     /** Navigate effect */
     const navigate = useNavigate();
+    /** Language */
+    const { pages: { CategoriesAdd: texts }} = useLanguage();
     /** Settings Context */
-    const { theme, openModal, closeModal, setLoading } = useContext(SettingsContext);
+    const { openModal, toastConfig } = useContext(SettingsContext);
     /** Categories Context */
-    const { insertCategory } = useContext(CategoriesContext);
+    const { insertCategories } = useContext(CategoriesContext);
     /** Form values */
-    const [nameController, setNameController] = useState(['']);
+    const [formController, setFormController] = useState(['']);
 
     /**
-     * Manejador de eventos para añadir un input
+     * 'Click' event handler for Add btn. 
+     * Add an empty category to the form.
      */
-    const onAddClick = event => {
-        setNameController(prev => {
+    const onAdd = event => {
+        setFormController(prev => {
             let names = clone(prev);
             names.push('');
             return names;
@@ -35,34 +42,59 @@ export default function CategoriesAdd() {
     }
 
     /**
-     * Manejador de eventos para quitar un input concreto
+     * 'Change' event handler for Form Inputs.
+     * Update the form controller state.
+     */
+    const onInputChange = (event, index) => {
+        const { value } = event.target;
+        setFormController(prev => {
+            let names = clone(prev);
+            names[index] = value;
+            return names;
+        });
+    }
+
+    /**
+     * 'Click' event handler for Quit input btn.
+     * Delete the input clicked from the form controller.
+     * If the user is not empty, it asks user before form confirmation.
      */
     const onQuitClick = (event, index) => {
-        if(nameController[index] === '') {
-            setNameController(prev => deleteArrayElement(prev, index));
+        if (formController[index] === '') {
+            setFormController(prev => deleteArrayElement(prev, index));
         } else {
             openModal({
-                title: 'Atención',
-                content: ['Has rellenado este campo. ¿Estás seguro de que quieres quitarlo?'],
-                onAccept: () => {
-                    setNameController(prev => deleteArrayElement(prev, index));
-                    closeModal();
-                },
-                onCancel: () => closeModal()
+                title: texts.txt8,
+                content: [texts.txt9],
+                onAccept: () => setFormController(prev => deleteArrayElement(prev, index)),
+                onCancel: () => {}
             });
         }
     }
 
     /**
-     * Manejador de eventos de los inputs 'name'
+     * 'Click' event handler for Reset btn. 
+     * Clear the form.
      */
-    const onInputChange = (event, index) => {
-        const { value } = event.target;
-        setNameController(prev => {
-            let names = clone(prev);
-            names[index] = value;
-            return names;
-        });
+    const onReset = event => {
+        if (formController.some(name => name !== '')) {
+            openModal({
+                title: texts.txt14,
+                content: [texts.txt15],
+                onAccept: () => setFormController(['']),
+                onCancel: () => {}
+            });
+        } else {
+            setFormController(['']);
+        }
+    }
+
+    /**
+     * 'Click' event handler for Save btn. 
+     * Submit the form.
+     */
+    const onSave = event => {
+        saveCategories();
     }
 
     /**
@@ -72,90 +104,79 @@ export default function CategoriesAdd() {
         event.preventDefault();
         event.stopPropagation();
 
-        setLoading(true);
+        saveCategories();
+    }
 
-        let promisesDefinitions = nameController.map(name => getPromise());
-        let promises = promisesDefinitions.map(p => p[0]);
-        let resolves = promisesDefinitions.map(p => p[1]);
+    /**
+     * Save categories implementation.
+     */
+    const saveCategories = async () => {
+        const inserted = await insertCategories({ categories: formController.map(name => ({ name })), toast: false });
+        if (!inserted) {
+            const message = formController.length === 1 ? texts.txt10 : texts.txt11;
+            toast.error(message, toastConfig({ autoClose: null }));
+        } else {
+            const message = formController.length === 1 ? texts.txt12 : texts.txt13;
+            toast.success(message, toastConfig());
 
-        nameController.forEach((name, index) => {
-            const category = { name };
-            insertCategory({ category, loading: false, toast: false }).then(inserted => resolves[index](inserted));
-        });
-
-        const values = await Promise.all(promises);
-
-        // Si alguna categoría tiene fallo...
-        if(values.some(value => value === null)) {
-            // Filtramos las categorías que no han podido insertarse
-            let controller = nameController.filter((name, index) => (values[index] === false));
-            setNameController(controller);
-
-            const message = values.length === 1 
-                ? 'No se ha podido insertar la categoría'
-                : 'No se han podido insertar algunas categorías';
-
-            toast.error(message, {
-                position: "top-center",
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: false,
-                progress: undefined,
-                theme: theme === THEME.DARK ? 'dark' : 'light'
-            });
+            navigate('/categories');
         }
-
-        // Si se han insertado bien todas las categorías, se lanza toast y se navega hacia /categories
-        else {
-            const message = values.length === 1 
-                ? 'Se ha insertado la categoría con éxito'
-                : 'Se han insertado todas las categorías con éxito';
-
-            toast.success(message, {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: false,
-                progress: undefined,
-                theme: theme === THEME.DARK ? 'dark' : 'light'
-            });
-
-            navigate("/categories");
-        }
-
-        setLoading(false);
     }
 
     return (
         <Suspense fallback={<ScreenSpinner />}>
             <StyledCategoriesAdd>
-                <form onSubmit={onSubmit}>
-                    <PrimaryButton className="add-category-link">Pulsa aquí para insertar la{nameController.length > 1 ? 's' : ''} categoría{nameController.length > 1 ? 's' : ''}</PrimaryButton>
+                <div className="categories-add-content">
+                    <GradientBackground
+                        className="gradient-background"
+                        dark="linear-gradient(60deg, #2C394B 0%, #082032 100%)"
+                        light="linear-gradient(90deg, rgba(233,237,251,1) 0%, rgba(179,193,242,1) 35%, rgba(58,93,223,.5) 100%)"
+                    />
 
-                    <h1 className="title">Añadir categoría</h1>
+                    <div className="info">
+                        <h1 className="info-title">{texts.txt1}</h1>
 
-                    {nameController.map((name, index) => (
-                        <div className="row" key={index}>
-                            <PrimaryInput
-                                name="name" 
-                                value={name} 
-                                onChange={event => onInputChange(event, index)} 
-                                placeholder="Nombre de la categoría" 
-                                label={`Categoría ${nameController.length > 1 ? (index + 1) : ''}`}
-                                autoComplete="off"
-                            />
+                        <p className="info-body">{texts.txt2}</p>
 
-                            {nameController.length > 1 && <button className="quit" onClick={event => onQuitClick(event, index)}>
-                                <AiOutlineClose />
-                            </button>}
-                        </div>
-                    ))}
+                        <p className="info-footer">
+                            <SuccessButton onClick={onSave}>
+                                <AiFillSave />
+                                <span>{texts.txt3}</span>
+                            </SuccessButton>
 
-                    <SecondaryButton type="button" onClick={onAddClick}>¡Quiero añadir más categorías!</SecondaryButton>
-                </form>
+                            <SecondaryButton onClick={onAdd}>
+                                <IoMdAddCircle />
+                                <span>{texts.txt4}</span>
+                            </SecondaryButton>
+
+                            <PrimaryButton onClick={onReset}>
+                                <MdOutlineClearAll />
+                                <span>{texts.txt5}</span>
+                            </PrimaryButton>
+                        </p>
+                    </div>
+
+                    <div className="form">
+                        <form onSubmit={onSubmit}>
+                            {formController.map((name, index) => (
+                                <div className="row" key={index}>
+                                    <PrimaryInput
+                                        name={`category-${index}`} 
+                                        value={name} 
+                                        onChange={event => onInputChange(event, index)} 
+                                        label={`${texts.txt6} ${formController.length > 1 ? (index + 1) : ''}`}
+                                        placeholder={texts.txt7}
+                                        autoComplete="off"
+                                    />
+
+                                    {formController.length > 1 && <button type="button" className="quit" onClick={event => onQuitClick(event, index)}>
+                                        <AiOutlineClose />
+                                    </button>}
+                                </div>
+                            ))}
+                        </form>
+                    </div>
+                </div>
             </StyledCategoriesAdd>
         </Suspense>
     );

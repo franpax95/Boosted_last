@@ -8,96 +8,128 @@ const { primary, secondary, tertiary, quaternary, success, danger } = color;
 
 export const StyledCategoriesAdd = styled.section`
     width: 100%;
-    max-width: 1000px;
     height: 100%;
-    margin: 0 auto;
 
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
     justify-content: center;
     align-items: center;
 
-    form {
+    .categories-add-content {
         width: 100%;
-        padding: max(3rem, 100px) 1rem;
+        max-width: 800px;
+        height: 100%;
+        max-height: 450px;
+        padding: 1rem;
 
-        position: relative;
-
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
+        display: grid;
+        gap: 2%;
+        grid-template-columns: 1fr minmax(350px, 1fr);
         justify-content: center;
         align-items: center;
 
-        .add-category-link {
-            position: absolute;
-            top: .5rem;
-            right: 0;
-        }
+        position: relative;
 
-        .row {
+        border-radius: 4px;
+        overflow: hidden;
+
+        .info {
+            z-index: 1;
+            height: 100%;
+            max-height: 350px;
             width: 100%;
-            max-width: 500px;
-            margin: 12px 0;
 
-            display: flex;
-            flex-direction: row;
+            display: grid;
             gap: 1rem;
-            justify-content: center;
-            align-items: center;
+            grid-template-rows: auto 1fr auto;
 
-            .quit {
-                width: 30px;
-                min-width: 30px;
-                height: 35px;
-                min-height: 35px;
+            .info-title {
+                width: 100%;
+                color: ${primary.default};
+                font-family: 'Syncopate';
+                font-size: ${font.xl};
+                text-transform: uppercase;
+                text-align: center;
+                transition: color ${transitionDuration}, font-size .1s;
+            }
 
-                display: flex;
-                justify-content: center;
-                align-items: center;
+            .info-body {
+                padding: 1rem;
+                color: ${color.text};
+                font-size: ${font.md};
+                text-align: center;
+                transition: color ${transitionDuration}, font-size .1s;
+            }
 
-                border: solid 1px ${danger.default};
-                border-radius: 999px;
-                background-color: rgba(0, 0, 0, 0);
-                color: ${danger.default};
+            .info-footer {
+                display: grid;
+                gap: 10px;
+                grid-template-columns: 1fr 1fr 1fr;
 
-                font-size: ${font.lg};
-
-                transition: 
-                    border-color ${transitionDuration},
-                    background-color ${transitionDuration},
-                    color ${transitionDuration};
-
-                &:hover {
-                    background-color: ${addOpacityToHex(danger.default, .2)};
-                    border-color: ${danger.hover};
-                    color: ${danger.hover};
-                }
-
-                &:active {
-                    border-color: ${danger.hover};
-                    color: ${danger.active};
+                button {
+                    max-height: 40px;
                 }
             }
         }
-    }
 
-    .title {
-        margin-bottom: 1.5rem;
+        .form {
+            z-index: 1;
+            height: 100%;
+            max-height: 80%;
+            padding: 2.5rem .75rem;
 
-        color: ${color.text};
+            overflow-y: auto;
+            border-radius: 4px;
+            background-color: ${quaternary.default};
+            
+            transition: background-color ${transitionDuration};
 
-        font-size: ${font.lg};
-        text-align: center;
+            /* width */
+            &::-webkit-scrollbar { width: 2px; }
+            /* Track */
+            &::-webkit-scrollbar-track { background: ${secondary.default} }
+            /* Handle */
+            &::-webkit-scrollbar-thumb { background: ${primary.default} }
+            /* Handle on hover */
+            &::-webkit-scrollbar-thumb:hover { background: ${primary.hover} }
 
-        transition: 
-            margin ${transitionDuration},
-            color ${transitionDuration},
-            font-size ${transitionDuration};
+            form {
+                display: flex;
+                flex-direction: column;
+                gap: 2.5rem;
+            }
 
-        @media (min-width: ${media.sm}px) {
-            font-size: ${font.xl};
+            .row {
+                display: grid;
+                gap: .5rem;
+                grid-template-columns: 1fr auto;
+                align-items: center;
+
+                .quit {
+                    width: 24px;
+                    height: 24px;
+
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+
+                    border: solid 1px ${danger.default};
+                    border-radius: 9999px;
+                    background-color: rgba(0, 0, 0, 0);
+                    color: ${danger.default};
+
+                    font-size: 18px;
+
+                    transition: 
+                        border-color ${transitionDuration},
+                        background-color ${transitionDuration},
+                        color ${transitionDuration};
+
+                    &:hover {
+                        border-color: ${danger.hover};
+                        color: ${danger.hover};
+                    }
+                }
+            }
         }
     }
 `;

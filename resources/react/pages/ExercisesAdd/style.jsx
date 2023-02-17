@@ -7,7 +7,6 @@ import styles, { textDark, textLight } from '../../styles/vars';
 const { color, font, media, transitionDuration } = styles;
 const { primary, secondary, tertiary, quaternary, success, danger } = color;
 
-
 export const StyledExercisesAdd = styled.section`
     width: 100%;
     max-width: 1000px;
@@ -17,7 +16,7 @@ export const StyledExercisesAdd = styled.section`
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
 
     form {

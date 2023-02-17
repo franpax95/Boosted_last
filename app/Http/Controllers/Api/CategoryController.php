@@ -10,7 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-
+use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
@@ -37,19 +37,46 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validate($request, [
-            'name' => 'required'
-        ]);
-
         $user = Auth::user();
-        $category = Category::create([
-            'name' => $request->name,
-            'user_id' => $user->id
-        ]);
 
-        return response()->json([
-            'category' => $category
-        ], 200);
+        // $cb = function($category) use ($user) {
+        //     return ([
+        //         'name' => $category['name'],
+        //         'user_id' => $user->id
+        //     ]);
+        // };
+
+        // $validator = Validator::make($request->all(), ['name' => 'required']); //->validate();
+        // if ($validator->fails()) {
+        //     return response()->json([
+        //         'errors' => $validator->errors(),
+        //         'request' => $request->all(),
+        //         'data2insert' => array_map($cb, $request->all())
+        //     ], 422);
+        // }
+        // $validated = $validator->validated();
+        // $categoriesToInsert = array_map($cb, $validated);
+
+        // Alternative manual validation because the Validator is not working, always fail
+        foreach ($request->all() as $category) {
+            if (!isset($category['name']) || $category['name'] == '') {
+                return response()->json(["error" => "The field 'name' is required."], 422);
+            }
+        }
+
+        // If valid, insert one by one
+        $categories = [];
+        foreach ($request->all() as $category) {
+            $category = Category::create([
+                'name' => $category['name'],
+                'user_id' => $user->id
+            ]);
+
+            array_push($categories, $category);
+        }
+
+        // Return inserted rows
+        return response()->json($categories, 200);
     }
 
     /**
@@ -109,10 +136,33 @@ class CategoryController extends Controller
         try {
             $category = Category::findOrFail($id);
             $category->delete();
-        } catch(ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'The category does not exist'], 404);
         }
 
-        return response()->json(null, 204);
+        return response()->json(null, 200);
+    }
+
+    /**
+     * Remove a resource collection from storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function remove(Request $request)
+    {
+        $notDeleted = [];
+        $categories = json_decode($request->categories);
+
+        foreach ($categories as $id) {
+            try {
+                $category = Category::findOrFail($id);
+                $category->delete();
+            } catch (ModelNotFoundException $e) {
+                array_push($notDeleted, $id);
+            }
+        }
+
+        return response()->json($notDeleted, 200);
     }
 }

@@ -1,178 +1,357 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState, Suspense, lazy } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { PrimaryLink } from '../../components/Anchor';
-import { PrimaryButton } from '../../components/Button';
-import { Input } from '../../components/Input';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
 import { ExercisesContext } from '../../contexts/ExercisesContext';
 import { SettingsContext } from '../../contexts/SettingsContext';
-import { clone } from '../../utils';
+import useLanguage from '../../hooks/useLanguage';
+import { beautifyDate, clone } from '../../utils';
 import { StyledExercise } from './style';
+import DarkIMG from '../../../images/athlete7-transparencies.png';
+import LightIMG from '../../../images/athlete8-transparencies.png';
+
+const PrimaryLink = lazy(() => import('../../components/Anchor').then(module => ({ default: module.PrimaryLink })));
+const GradientBackground = lazy(() => import('../../components/Background').then(module => ({ default: module.GradientBackground })));
+const ImageBackground = lazy(() => import('../../components/Background').then(module => ({ default: module.ImageBackground })));
+const PrimaryButton = lazy(() => import('../../components/Button').then(module => ({ default: module.PrimaryButton })));
+const SecondaryButton = lazy(() => import('../../components/Button').then(module => ({ default: module.SecondaryButton })));
+const SuccessButton = lazy(() => import('../../components/Button').then(module => ({ default: module.SuccessButton })));
+const DangerButton = lazy(() => import('../../components/Button').then(module => ({ default: module.DangerButton })));
+const CategoryToggle = lazy(() => import('../../components/Input').then(module => ({ default: module.CategoryToggle })));
+const PrimaryFileInput = lazy(() => import('../../components/Input').then(module => ({ default: module.PrimaryFileInput })));
+const PrimaryInput = lazy(() => import('../../components/Input').then(module => ({ default: module.PrimaryInput })));
+const PrimaryTextarea = lazy(() => import('../../components/Input').then(module => ({ default: module.PrimaryTextarea })));
+
+/**
+ * Shortcut to parse an exercise to a form controller object
+ */
+const exercise2controller = ({ category_id, category_name, created_at, updated_at, ...exercise }) => ({
+    ...exercise,                // The exercise info
+    isNewCategory: false,       // Necessary to indicate CategoryToggle component which side is active
+    categoryId: category_id,    // The id of the category selected in the CategoryToggle component
+    categoryName: ''            // Name of the new category to insert in the CategoryToggle component
+});
+
+/**
+ * Shortcut to parse a form controller object to exercise
+ */
+const controller2exercise = ({ isNewCategory, categoryId, categoryName, ...controller }) => ({
+    ...controller, 
+    category_id: categoryId
+});
 
 export default function Exercise() {
+    /**  */
+    const ref = useRef();
     /** Url Params */
     const { id } = useParams();
     /** Navigation */
     const navigate = useNavigate();
-
-    /** Categories Context */
-    const { categories, fetchCategories } = useContext(CategoriesContext);
-    /** Categories Context */
-    const { exercise, fetchExercise, updateExercise, deleteExercise } = useContext(ExercisesContext);
     /** Settings Context */
-    const { openModal, closeModal, closeAllModal } = useContext(SettingsContext);
-
-    /** Oculta la pantalla. Útil sobretodo para esperar al fetch inicial. */
-    const [hide, setHide] = useState(true);
+    const { closeAllModal, openModal, setLoading } = useContext(SettingsContext);
+    /** Categories Context */
+    const { categories, fetchCategories, insertCategories, refresh: refreshCategories } = useContext(CategoriesContext);
+    /** Categories Context */
+    const { exercise, fetchExercise, updateExercise, deleteExercise, refresh: refreshExercises } = useContext(ExercisesContext);
+    /** Language */
+    const { pages: { Exercise: texts }} = useLanguage();
+    /** Form parameters to edit */
+    const [formController, setFormController] = useState(exercise ? exercise2controller(exercise) : null);
     /** state to render Edit Form */
     const [showForm, setShowForm] = useState(false);
-    /** state with a copy of the exercise to handle form fields */
-    const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
-    const [categoryId, setCategoryId] = useState(null);
+    /** Hide the screen until the initial fetching is over */
+    const [hide, setHide] = useState(true);
 
-    // ComponentDidMount para pedir categoría
+    // ComponentDidMount: fetch exercise into component when needed
     useEffect(() => {
         const fetch = async () => {
-            // Cargamos las categorías si no lo estuvieran ya, de manera concurrente
-            if(categories === null) {
+            if (exercise === null || exercise.id !== Number(id)) {
+                await fetchExercise({ id });
+            }
+
+            if (categories === null) {
                 fetchCategories();
             }
-    
-            // Cargamos el ejercicio
-            await fetchExercise({ id });
 
-            // Una vez cargado el ejercicio, mostramos el contenido de la página
             setHide(false);
         }
 
         fetch();
     }, []);
 
-    // ComponentDidUpdate: exercise. Actualiza los valores del formulario si se actualiza el exercise.
+    // componentDidUpdate -> exercise: update the form controller with the new exercise loaded
     useEffect(() => {
-        if(exercise !== null) {
-            setName(exercise.name);
-            setDescription(exercise.description);
-            setCategoryId(exercise.category_id);
-        }
+        setFormController(exercise ? exercise2controller(exercise) : null);
     }, [exercise]);
 
-    
-    const onEditClick = async event => {
-        event.preventDefault();
-        event.stopPropagation();
-
-        // Si no se muestra formulario y hay categoría seteada, muestra el formulario
-        if(!showForm && exercise !== null) {
-            setShowForm(true);
-        } 
-        
-        // Si no, si se está mostrando el formulario, hace la petición de editar el exercise y cierra el formulario si ha ido bien
-        else if(showForm) {
-            const ex = { id: exercise.id, name, description, category_id: categoryId };
-            const ok = await updateExercise({ exercise: ex });
-
-            if(ok) {
-                setShowForm(false);
-            }
+    useEffect(() => {
+        if (ref.current) {
+            ref.current.scrollIntoView({ behavior: 'smooth' });
         }
+    }, [showForm]);
+
+    /**
+     * 'Click' event handler for cancel (form) button.
+     * Hide the category form and reset name field.
+     */
+    const onCancelClick = event => {
+        setShowForm(false);
+
+        setTimeout(() => {
+            setFormController(exercise ? exercise2controller(exercise) : null);
+        }, 500);
     }
 
+    /**
+     * 'Click' event handler for delete category button.
+     * Asks confirmation twice, then delete the category.
+     * If success, it redirect to '/categories'.
+     */
     const onDeleteClick = async event => {
-        event.preventDefault();
-        event.stopPropagation();
+        if (exercise !== null) {
+            const delExercise = async () => {
+                setLoading(true);
 
-        // Si se está mostrando el formulario, hace de botón de Cancelar formulario, es decir, lo oculta y resetea
-        if(showForm) {
-            setName(exercise.name);
-            setShowForm(false);
-        }
+                const ex = clone(exercise);
+                const deleted = await deleteExercise({ id: ex.id, loading: false });
+                if (deleted) {
+                    await refreshCategories();
+                }
 
-        // Si no se muestra el formulario, lanza modal para preguntar si debe eliminar el ejercicio
-        else {
+                setLoading(false);
+
+                if (deleted) {
+                    navigate('/exercises');
+                }
+            }
+
             openModal({
-                title: 'Aviso',
-                content: ["Va a proceder a borrar el ejercicio. ¿Está seguro de que desea continuar?"],
-                onAccept: () => openModal({
-                    title: 'Aviso',
-                    content: ["Si continúas no podrás recuperar el ejercicio. ¿Desea continuar aun así?"],
-                    onAccept: () => {
-                        const delExe = async () => {
-                            const ok = await deleteExercise({ id: exercise.id });
-                            if(ok) {
-                                navigate("/exercises");
-                            }
-
-                            closeAllModal();
-                        }
-
-                        delExe();
-                    },
-                    onCancel: () => closeAllModal()
-                }),
-                onCancel: () => closeModal()
+                title: texts.txt19,
+                content: [texts.txt20],
+                onAccept: () => delExercise(),
+                onCancel: () => {}
             });
         }
     }
 
-
-    if(hide) {
-        return 'Cargando...';
+    /**
+     * 'Click' event handler for edit button.
+     * Hide the exercise info and shows the form to edit it.
+     */
+    const onEditClick = async event => {
+        if (formController !== null) {
+            setShowForm(true);
+        }
     }
 
-    // Muestra mensaje en caso de no haber ejercicio cargado
-    if(exercise === null) {
-        return (
-            <div>No se encuentra el ejercicio que buscas...</div>
-        );
+    /**
+     * 'Change' event handler for inputs.
+     */
+    const onFormControllerChange = (attr, value) => {
+        setFormController(prev => ({ ...prev, [attr]: value }));
+    }
+
+    /**
+     * 'Click' event handler for save form button.
+     * Update exercise and, if success, hide the exercise form.
+     */
+    const onSaveClick = event => {
+        saveExercise();
+    }
+
+    /**
+     * 'Submit' event handler for edit exercise form.
+     * Update the exercise.
+     */
+    const onSubmit = e => {
+        e.preventDefault();
+        saveExercise();
+    }
+
+    /**
+     * Update the exercise
+     */
+    const saveExercise = async () => {
+        setLoading(true);
+
+        // We save the initial category id to check if there are changes on it
+        const oldCategoryId = exercise.category_id;
+
+        // Select the category id. If it is new, insert it before the exercise.
+        let categoryId = formController.categoryId;
+        if (formController.isNewCategory) {
+            const categoryInserted = await insertCategories({ categories: [{ name: formController.categoryName }], loading: false, toast: false, refresh: false });
+
+            if (!Array.isArray(categoryInserted) || categoryInserted.length === 0) {
+                const message = 'Ha ocurrido un error a la hora de insertar la categoría...';
+                toast.error(message, toastConfig({ autoClose: null }));
+                setLoading(false);
+                return;
+            }
+
+            categoryId = categoryInserted[0].id;
+        }
+
+        // Update the exercise
+        const exerciseUpdated = await updateExercise({ exercise: controller2exercise({ ...formController, categoryId }), loading: false });
+        if (exerciseUpdated) {
+            if (categoryId !== oldCategoryId) {
+                await refreshCategories();
+            }
+            setShowForm(false);
+        }
+
+        setLoading(false);
+    }
+
+    // Not found message when not exercise loaded
+    if (exercise === null) {
+        return <div>No se encuentra el ejercicio que buscas...</div>;
+    }
+
+    // Hide the section
+    if (hide) {
+        return '';
     }
 
     return (
-        <StyledExercise>
-            {/* <PrimaryButton onClick={onEditClick}>Editar ejercicio</PrimaryButton> */}
-            <PrimaryLink to={`/exercises/edit/${id}`}>Editar ejercicio</PrimaryLink>
-            <PrimaryButton onClick={onDeleteClick}>Eliminar ejercicio</PrimaryButton>
+        <Suspense>
+            <StyledExercise>
+                <header>
+                    <GradientBackground
+                        className="bg1"
+                        dark="linear-gradient(60deg, #2C394B 0%, #082032 100%)"
+                        light="linear-gradient(to top, #F9F6F7 0%, #F0F0F0 100%)"
+                    />
 
-            {showForm && <form>
-                <Input 
-                    name="name" 
-                    value={name} 
-                    onChange={e => setName(e.target.value)} 
-                    placeholder="Nombre del ejercicio" 
-                />
+                    <div className="info">
+                        <h1 className="info-title">{texts.txt1}</h1>
 
-                <textarea
-                    name="description"
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                    placeholder="Descripción del ejercicio"
-                ></textarea>
+                        <p className="info-body">{texts.txt2}</p>
 
-                <select value={categoryId} onChange={e => setCategoryId(e.target.value)}>
-                    {categories && categories.map(category => (
-                        <option key={category.id} value={category.id}>{category.name}</option>
-                    ))}
-                </select>
-            </form>}
+                        <p className="info-footer">{texts.txt3}</p>
+                    </div>
 
-            {!showForm && <div className="exercise">
-                {exercise.image && <div className="image">
-                    <img src={exercise.image} alt={exercise.name} />
-                </div>}
+                    <div className="backgrounds">
+                        <GradientBackground
+                            className="bg1"
+                            dark="linear-gradient(0deg, rgba(127,186,18,0.33) 0%, rgba(127,186,18,1) 100%)"
+                            light="linear-gradient(0deg, rgba(58,93,223,0.33) 0%, rgba(58,93,223,1) 100%)"
+                        />
 
-                <div className="name">
-                    {exercise.name}
-                </div>    
+                        <ImageBackground 
+                            className="bg2"
+                            objectFit="contain"
+                            light={LightIMG}
+                            dark={DarkIMG}
+                        />
 
-                {exercise.description && <div className="description">
-                    {exercise.description}
-                </div>}
+                        <GradientBackground
+                            className="bg3"
+                            dark="linear-gradient(0deg, rgba(127,186,18,1) 0%, rgba(127,186,18,0.33) 100%)"
+                            light="linear-gradient(0deg, rgba(58,93,223,1) 0%, rgba(58,93,223,0.33) 100%)"
+                        />
+                    </div>
+                </header>
 
-                <div className="category">
-                    <Link to={`/categories/${exercise.category_id}`}>{exercise.category_name}</Link>
+                <br ref={ref} />
+
+                <div className="slider">
+                    <div className={`card left ${showForm ? '' : 'active'}`}>
+                        <div className="exercise-info">
+                            <h1 className="title">{texts.txt4}</h1>
+
+                            <div className="group name">
+                                <label>{texts.txt5}</label>
+                                <span>{exercise.name}</span>
+                            </div>
+
+                            <div className="group category">
+                                <label>{texts.txt6}</label>
+                                <span>
+                                    <Link to={`/categories/${exercise.category_id}`}>{exercise.category_name}</Link>
+                                </span>
+                            </div>
+
+                            <div className="group description">
+                                <label>{texts.txt7}</label>
+                                <span>{exercise.description}</span>
+                            </div>
+
+                            <div className="group created_at">
+                                <label>{texts.txt8}</label>
+                                <span>{beautifyDate(exercise.created_at)}</span>
+                            </div>
+
+                            <div className="group updated_at">
+                                <label>{texts.txt9}</label>
+                                <span>{beautifyDate(exercise.updated_at)}</span>
+                            </div>
+
+                            {exercise.image ? <div className="group image">
+                                <label>{texts.txt21}</label>
+                                <div className="img">
+                                    <img src={exercise.image} alt={exercise.name} />
+                                </div>
+                            </div> : ''}
+
+                            <div className="buttons">
+                                <PrimaryButton onClick={onEditClick}>{texts.txt10}</PrimaryButton>
+                                <DangerButton onClick={onDeleteClick}>{texts.txt11}</DangerButton>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className={`card right ${showForm ? 'active' : ''}`}>
+                        <div className="exercise-form">
+                            <h1 className="title">{texts.txt12}</h1>
+
+                            {formController !== null ? <form onSubmit={onSubmit}>
+                                <PrimaryInput
+                                    className="exercise-name"
+                                    name="name" 
+                                    value={formController.name} 
+                                    onChange={e => onFormControllerChange('name', e.target.value)} 
+                                    placeholder={texts.txt13}
+                                    label={texts.txt14}
+                                    autoComplete="off"
+                                />
+
+                                <CategoryToggle
+                                    className="category-toggle"
+                                    isNewCategory={formController.isNewCategory}
+                                    categories={categories || []}
+                                    categoryId={formController.categoryId}
+                                    categoryName={formController.categoryName}
+                                    setIsNewCategory={value => onFormControllerChange('isNewCategory', value)}
+                                    setCategoryId={value => onFormControllerChange('categoryId', value)}
+                                    setCategoryName={value => onFormControllerChange('categoryName', value)}
+                                />
+
+                                <PrimaryTextarea
+                                    className="exercise-description"
+                                    name="description" 
+                                    value={formController.description} 
+                                    onChange={e => onFormControllerChange('description', e.target.value)} 
+                                    placeholder={texts.txt15}
+                                    label={texts.txt16}
+                                />
+
+                                <PrimaryFileInput 
+                                    id={`image-input`}
+                                    className="edit-image-input"
+                                    value={formController.image}
+                                    onChange={value => onFormControllerChange('image', value)}
+                                />
+                            </form> : ''}
+
+                            <div className="buttons">
+                                <SuccessButton onClick={onSaveClick}>{texts.txt17}</SuccessButton>
+                                <SecondaryButton onClick={onCancelClick}>{texts.txt18}</SecondaryButton>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>}
-        </StyledExercise>
+            </StyledExercise>
+        </Suspense>
     );
 }

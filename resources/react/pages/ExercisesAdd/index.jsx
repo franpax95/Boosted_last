@@ -18,7 +18,7 @@ export default function ExercisesAdd() {
     /** Settings Context */
     const { theme, setLoading, openModal, closeModal } = useContext(SettingsContext);
     /** Categories Context */
-    const { categories, fetchCategories, insertCategory } = useContext(CategoriesContext);
+    const { categories, fetchCategories, insertCategory, refresh: refreshCategories } = useContext(CategoriesContext);
     /** Categories Context */
     const { insertExercise } = useContext(ExercisesContext);
     /** Form values: each element of the collection is considered as a group */
@@ -245,6 +245,8 @@ export default function ExercisesAdd() {
                 progress: undefined,
                 theme: theme === THEME.DARK ? 'dark' : 'light'
             });
+
+            await refreshCategories();
 
             navigate("/exercises");
         }
