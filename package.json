@@ -21,7 +21,10 @@
     "dependencies": {
         "@esbuild-plugins/node-globals-polyfill": "^0.1.1",
         "@esbuild-plugins/node-modules-polyfill": "^0.1.4",
+        "file-saver": "^2.0.5",
+        "file-type": "^18.2.0",
         "md5": "^2.3.0",
+        "mime": "^3.0.0",
         "node-sass": "^8.0.0",
         "react-icons": "^4.3.1",
         "react-router": "^6.3.0",

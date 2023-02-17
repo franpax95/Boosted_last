@@ -1,6 +1,7 @@
 import React, { memo, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { beautifyDate, clone, compareStringArray } from '../../utils';
+import { clone, compareStringArray } from '../../utils';
+import { beautifyDate } from '../../utils/dates';
 import { PrimaryCheckbox } from '../Input';
 import { StyledTable } from './style';
 import { BsChevronDown } from 'react-icons/bs';

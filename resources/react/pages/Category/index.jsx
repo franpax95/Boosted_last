@@ -6,7 +6,8 @@ import { SettingsContext } from '../../contexts/SettingsContext';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
 import { ExercisesContext } from '../../contexts/ExercisesContext';
 import useLanguage from '../../hooks/useLanguage';
-import { beautifyDate, clone, deleteAccents, deleteArrayElement } from '../../utils';
+import { clone, deleteAccents, deleteArrayElement } from '../../utils';
+import { beautifyDate } from '../../utils/dates';
 import DarkIMG from '../../../images/athlete3-transparencies.png';
 import LightIMG from '../../../images/athlete4-transparencies.png';
 

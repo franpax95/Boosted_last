@@ -1,15 +1,13 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { StyledCategoryToggle, StyledInput, StyledPrimaryCheckbox, StyledPrimaryFileInput, StyledPrimaryFileInputPreview, StyledPrimaryInput, StyledSearchBar } from './style';
 import { AiOutlineSearch, AiOutlineClose, AiFillFileImage } from 'react-icons/ai';
-import { clone, fileToBase64 } from '../../utils';
+import { fileToBase64 } from '../../utils/files';
 import { MdAdsClick } from 'react-icons/md';
 import { IoMdClose } from 'react-icons/io';
 import { config, useTransition } from 'react-spring';
 import { PrimaryButton } from '../Button';
-import { memo } from 'react';
 import { SettingsContext } from '../../contexts/SettingsContext';
 import { THEME } from '../../states/theming';
-
 
 export const Input = ({ id, className = '', type = 'text', name, value, onChange, placeholder, autoComplete = 'on' }) => (
     <StyledInput 
