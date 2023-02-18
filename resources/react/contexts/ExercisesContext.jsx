@@ -53,9 +53,8 @@ function ExercisesProvider({ children }) {
         if (force === true || exercise === null || (exercise !== null && exercise.id !== id)) {
             const data = await request('GET', `/api/exercises/${id}`, { haveLoading, failToast: haveToast ? '' : null })
                 .then(data => {
-                    const { exercise } = data;
-                    setExerciseState(parseExercise(exercise));
-                    return exercise;
+                    setExerciseState(parseExercise(data));
+                    return data;
                 })
                 .catch(error => {
                     setExerciseState(null);
@@ -69,25 +68,31 @@ function ExercisesProvider({ children }) {
     }
 
     /**
-     * Insert an exercise. If inserted correctly, it asks for the exercises again.
-     * Returns true or false indicating whether the insert was successful.
+     * Insert a collection of exercises. 
+     * Returns the recently inserted data.
      */
-    async function insertExercise({ exercise, loading: haveLoading = true, toast: haveToast = true } = {}) {
+    async function insertExercises({ exercises, loading: haveLoading = true, toast: haveToast = true, shouldRefresh = true } = {}) {
+        if (!Array.isArray(exercises)) {
+            return null;
+        }
+        
         const successMessage = texts.txt1;
         const errorMessage = texts.txt2;
-        
         if (haveLoading) setLoading(true);
 
         const data = await request('POST', '/api/exercises', { 
-                body: exercise, 
+                body: exercises, 
                 haveLoading: false, 
                 successToast: haveToast ? successMessage : null, 
                 failToast: haveToast ? errorMessage : null 
             })
-            .then(data => data.exercise)
-            .catch(error => null);
+            .then(data => data)
+            .catch(error => {
+                console.error(error);
+                return null;
+            });
 
-        if (data) await fetchExercises({ loading: false });
+        if (data && shouldRefresh) await refresh();
         if (haveLoading) setLoading(false);
 
         return data;
@@ -223,7 +228,7 @@ function ExercisesProvider({ children }) {
     const value = {
         exercises, exercise, 
         fetchExercises, fetchExercise, 
-        insertExercise, updateExercise, 
+        insertExercises, updateExercise, 
         deleteExercise, deleteExercises,
         refresh,
     };

@@ -56,16 +56,16 @@ class CategoryController extends Controller
 
         // Alternative manual validation because the Validator is not working, always fail
         foreach ($request->all() as $category) {
-            if (!isset($category['name']) || $category['name'] == '') {
-                return response()->json(["error" => "The field 'name' is required."], 422);
+            if (!isset($category['name']) || $category['name'] === '') {
+                return response()->json(["errors" => ["The field 'name' is required."]], 422);
             }
         }
 
         // If valid, insert one by one
         $categories = [];
-        foreach ($request->all() as $category) {
+        foreach ($request->all() as $cat) {
             $category = Category::create([
-                'name' => $category['name'],
+                'name' => $cat['name'],
                 'user_id' => $user->id
             ]);
 
@@ -92,9 +92,7 @@ class CategoryController extends Controller
             return response()->json(['error' => 'The category does not exist'], 401);
         } 
 
-        return response()->json([
-            'category' => $category
-        ], 200);
+        return response()->json($category, 200);
     }
 
     /**

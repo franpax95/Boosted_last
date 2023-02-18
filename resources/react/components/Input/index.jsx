@@ -198,8 +198,6 @@ export const PrimaryImageInput = ({ id = '', className = '', name = '', value = 
     
     // componentDidUpdate: value. If value passed, prepare the preview image with the content type.
     useEffect(() => {
-        console.dir(value);
-
         if (value !== null) {
             getBase64ContentType(value.base64).then(b64ContentType => setImage(`${b64ContentType}${value.base64}`));
         } else if (image !== '') { // value null and image not empty
@@ -207,13 +205,15 @@ export const PrimaryImageInput = ({ id = '', className = '', name = '', value = 
         }
     }, [value]);
 
+    // useEffect(() => console.dir(image), [image])
+
     // 'Change' event handler for file input
     const onInputChange = async event => {
         if (event.target.files.length > 0) {
             let base64 = '';
             let [original] = event.target.files;
             base64 = await fileToBase64(original);
-            const newImage = { name: original.name, base64: base64.split(',')[0] };
+            const newImage = { name: original.name, base64: base64.split(',')[1] };
 
             if (onChange) {
                 console.dir(newImage);

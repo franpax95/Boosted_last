@@ -64,8 +64,7 @@ function CategoriesProvider({ children }) {
 
     /**
      * Insert a collection of categories. 
-     * If inserted correctly, update categories list state.
-     * Returns the recently inserted categories.
+     * Returns the recently inserted data.
      */
     async function insertCategories({ categories, loading: haveLoading = true, toast: haveToast = true, refresh: shouldRefresh = true } = {}) {
         const successMessage = texts.txt1;

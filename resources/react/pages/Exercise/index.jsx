@@ -10,7 +10,6 @@ import { StyledExercise } from './style';
 import DarkIMG from '../../../images/athlete7-transparencies.png';
 import LightIMG from '../../../images/athlete8-transparencies.png';
 
-const PrimaryLink = lazy(() => import('../../components/Anchor').then(module => ({ default: module.PrimaryLink })));
 const GradientBackground = lazy(() => import('../../components/Background').then(module => ({ default: module.GradientBackground })));
 const ImageBackground = lazy(() => import('../../components/Background').then(module => ({ default: module.ImageBackground })));
 const PrimaryButton = lazy(() => import('../../components/Button').then(module => ({ default: module.PrimaryButton })));

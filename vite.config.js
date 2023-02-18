@@ -18,7 +18,7 @@ export default ({ command }) => ({
             plugins: [
                 // Enable rollup polyfills plugin
                 // used during production bundling
-                rollupNodePolyFill()
+                rollupNodePolyFill(),
             ]
         },
     },
@@ -28,12 +28,31 @@ export default ({ command }) => ({
             'resources/css/app.css',
             'resources/js/app.js',
         ]),
+        // {
+        //     ...inject({
+        //         global: [
+        //             require.resolve('node-stdlib-browser/helpers/esbuild/shim'),
+        //             'global'
+        //         ],
+        //         process: [
+        //             require.resolve('node-stdlib-browser/helpers/esbuild/shim'),
+        //             'process'
+        //         ],
+        //         Buffer: [
+        //             require.resolve('node-stdlib-browser/helpers/esbuild/shim'),
+        //             'Buffer'
+        //         ]
+        //     }),
+        //     enforce: 'post'
+        // }
     ],
     server:{
         port: 3001
     },
     resolve: {
         alias: {
+            buffer: 'rollup-plugin-node-polyfills/polyfills/buffer-es6',
+
             // This Rollup aliases are extracted from @esbuild-plugins/node-modules-polyfill,
             // see https://github.com/remorses/esbuild-plugins/blob/master/node-modules-polyfill/src/polyfills.ts
             // process and buffer are excluded because already managed
@@ -46,8 +65,6 @@ export default ({ command }) => ({
             querystring: 'rollup-plugin-node-polyfills/polyfills/qs',
             punycode: 'rollup-plugin-node-polyfills/polyfills/punycode',
             url: 'rollup-plugin-node-polyfills/polyfills/url',
-            string_decoder:
-                'rollup-plugin-node-polyfills/polyfills/string-decoder',
             http: 'rollup-plugin-node-polyfills/polyfills/http',
             https: 'rollup-plugin-node-polyfills/polyfills/http',
             os: 'rollup-plugin-node-polyfills/polyfills/os',
@@ -70,6 +87,8 @@ export default ({ command }) => ({
             tty: 'rollup-plugin-node-polyfills/polyfills/tty',
             domain: 'rollup-plugin-node-polyfills/polyfills/domain',
             process: 'rollup-plugin-node-polyfills/polyfills/process-es6',
+            string_decoder:
+                'rollup-plugin-node-polyfills/polyfills/string-decoder',
         }
     },
     optimizeDeps: {
@@ -82,11 +101,11 @@ export default ({ command }) => ({
             plugins: [
                 NodeGlobalsPolyfillPlugin({
                     process: true,
-                    buffer: true
+                    buffer: true,
                 }),
                 NodeModulesPolyfillPlugin()
             ]
-        }
+        },
     },
 });
 

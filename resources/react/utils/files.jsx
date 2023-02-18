@@ -1,6 +1,15 @@
 import mime from 'mime';
-import { fileTypeFromBuffer } from 'file-type';
-// import { Buffer } from 'buffer';
+// import { fileTypeFromBuffer } from 'file-type';
+import FileType from 'file-type';
+import { Buffer } from 'buffer';
+
+/**
+ * Returns the extension and the Content Type of a base64.
+ */
+export const getBase64MimeInfo = async b64 => {
+    const buffer = Buffer.from(b64, 'base64');
+    return FileType.fromBuffer(buffer);
+}
 
 /**
  * Convert a base64 file to a Blob file
@@ -100,13 +109,7 @@ export const getBase64ContentType = async b64 => {
     return info ? `data:${info.mime};base64,` : '';
 }
 
-/**
- * Returns the extension and the Content Type of a base64.
- */
-export const getBase64MimeInfo = async b64 => {
-    // const buffer = Buffer.from(b64, 'base64');
-    return fileTypeFromBuffer(b64);
-}
+
 
 /**
  * Indicate the Content Type (image/png, application/pdf, etc) based on the path passed as argument.
