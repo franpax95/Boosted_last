@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-
 class ExerciseController extends Controller
 {
     /**
@@ -21,26 +20,9 @@ class ExerciseController extends Controller
      */
     public function index()
     {
-        // Recogemos el usuario y pedimos los ejercicios y las categorías asociadas a este
         $user = Auth::user();
-        $exercises = Exercise::where('user_id', $user->id)->orderBy('name', 'asc')->get();
-        $categories = Category::where('user_id', $user->id)->get();
-
-        // Creamos un array que sirva para parsear los nombres de categorías mediante clave-valor
-        $parser = [];
-        foreach($categories as $category) {
-            $parser[$category->id] = $category->name;
-        }
-
-        // Recorremos los ejercicios y añadimos el nombre de la categoría según corresponda mediante el parser
-        foreach($exercises as $exercise) {
-            $exercise->category_name = $parser[$exercise->category_id];
-        }
-
-        // Devolvemos los ejercicios
-        return response()->json([
-            'exercises' => $exercises
-        ], 200);
+        $exercises = Exercise::with('image', 'category', 'user')->where('user_id', $user->id)->orderBy('name', 'asc')->get();
+        return response()->json($exercises, 200);
     }
 
     /**
@@ -59,9 +41,7 @@ class ExerciseController extends Controller
         $user = Auth::user();
         $exercise = Exercise::create(['user_id' => $user->id] + $request->all());
 
-        return response()->json([
-            'exercise' => $exercise
-        ], 200);
+        return response()->json([$exercise], 200);
     }
 
     /**

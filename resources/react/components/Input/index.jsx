@@ -1,9 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { StyledCategoryToggle, StyledInput, StyledPrimaryCheckbox, StyledPrimaryFileInput, StyledPrimaryFileInputPreview, StyledPrimaryInput, StyledSearchBar } from './style';
 import { AiOutlineSearch, AiOutlineClose, AiFillFileImage } from 'react-icons/ai';
-import { fileToBase64 } from '../../utils/files';
+import { fileToBase64, getBase64ContentType } from '../../utils/files';
 import { MdAdsClick } from 'react-icons/md';
-import { IoMdClose } from 'react-icons/io';
 import { config, useTransition } from 'react-spring';
 import { PrimaryButton } from '../Button';
 import { SettingsContext } from '../../contexts/SettingsContext';
@@ -175,12 +174,17 @@ export const PrimaryTextarea = ({ id = '', className = '', name = '', value, onC
     );
 }
 
-export const PrimaryFileInput = ({ id = '', className = '', name = '', value = '', onChange, accept = "image/*" }) => {
+/**
+ * Component to handle images. 
+ * Receives and emit a Document object ({ name, base64 }).
+ */
+export const PrimaryImageInput = ({ id = '', className = '', name = '', value = null, onChange, accept = "image/*" }) => {
     // input file ref
     const fileRef = useRef(null);
-    
     // State to show photo visor
     const [showVisor, setVisor] = useState(false);
+    // Image prepared to display, with content type setted
+    const [image, setImage] = useState('');
 
     // Animation to display photo visor
     const transitions = useTransition(showVisor, {
@@ -192,39 +196,47 @@ export const PrimaryFileInput = ({ id = '', className = '', name = '', value = '
         // onRest: () => setVisor(!showVisor)
     })
     
-    useEffect(() => console.dir(value), [value]);
+    // componentDidUpdate: value. If value passed, prepare the preview image with the content type.
+    useEffect(() => {
+        console.dir(value);
 
-    // Manejador de eventos 'change' del input file
+        if (value !== null) {
+            getBase64ContentType(value.base64).then(b64ContentType => setImage(`${b64ContentType}${value.base64}`));
+        } else if (image !== '') { // value null and image not empty
+            setImage('');
+        }
+    }, [value]);
+
+    // 'Change' event handler for file input
     const onInputChange = async event => {
-        if(event.target.files.length > 0) {
+        if (event.target.files.length > 0) {
             let base64 = '';
             let [original] = event.target.files;
-            let file = new File([original], original.name, { type: original.type });
-
             base64 = await fileToBase64(original);
-            file.base64 = base64;
+            const newImage = { name: original.name, base64: base64.split(',')[0] };
 
             if (onChange) {
-                console.dir(file);
-                onChange(file);
-                event.target.value = '';
+                console.dir(newImage);
+                onChange(newImage);
             }
+
+            event.target.value = '';
         }
     }
 
-    // Elimina la imagen cargada
+    // 'Click' event handle to delete the image loaded
     const onCancelClick = event => {
         event.preventDefault();
         event.stopPropagation();
 
         if (onChange) {
-            onChange('');
+            onChange(null);
         }
 
         setVisor(false);
     }
 
-    // Abre el visor de fotos asociado al input
+    // 'Click' event handler for Open Preview Btn.
     const onPreviewClick = event => {
         event.preventDefault();
         event.stopPropagation();
@@ -232,7 +244,7 @@ export const PrimaryFileInput = ({ id = '', className = '', name = '', value = '
         setVisor(true);
     }
 
-    // Permite subir otra imagen desde el visor de fotos directamente
+    // 'Click' event handler for Reload Btn.
     const onReloadClick = event => {
         event.preventDefault();
         event.stopPropagation();
@@ -244,7 +256,7 @@ export const PrimaryFileInput = ({ id = '', className = '', name = '', value = '
     
     return (<>
         <StyledPrimaryFileInput htmlFor={id} className={className} ref={fileRef}>
-            <div className={`screen no-image ${value === '' && 'active'}`}>
+            <div className={`screen no-image ${value === null ? 'active' : ''}`}>
                 <div className="icon">
                     <AiFillFileImage />
                 </div>
@@ -254,7 +266,7 @@ export const PrimaryFileInput = ({ id = '', className = '', name = '', value = '
                 </div>
             </div>
 
-            <div className={`screen with-image ${value !== '' && 'active'}`}>
+            <div className={`screen with-image ${value !== null ? 'active' : ''}`}>
                 {/** Vista previa y nombre de la imagen */}
                 <div className="image">
                     <button className="hover-screen" onClick={onPreviewClick}>
@@ -262,11 +274,11 @@ export const PrimaryFileInput = ({ id = '', className = '', name = '', value = '
                         <MdAdsClick />
                     </button>
 
-                    {value !== '' && <img src={value.base64} alt={value.name} />}
+                    {value !== '' && <img src={image} alt={value && value.name ? value.name : ''} />}
                 </div>
 
                 <div className="text">
-                    {value !== '' ? value.name : 'Imagen subida'}
+                    {value && value.name ? value.name : 'Imagen subida'}
                 </div>
             </div>
 
@@ -278,15 +290,15 @@ export const PrimaryFileInput = ({ id = '', className = '', name = '', value = '
                 onChange={onInputChange}
             />
 
-            {value !== '' && <button type="button" className="quit" onClick={onCancelClick}>
-                <IoMdClose />
+            {value !== null && <button type="button" className="quit" onClick={onCancelClick}>
+                <AiOutlineClose />
             </button>}
         </StyledPrimaryFileInput>
 
         {transitions((styles, item) => item && <StyledPrimaryFileInputPreview style={styles} onClick={() => setVisor(false)}>
             <div className="box" onClick={event => event.stopPropagation()}>
                 <div className="image">
-                    {value !== '' && <img src={value.base64} alt={value.name} />}
+                    {value !== null && <img src={image} alt={value && value.name ? value.name : ''} />}
                 </div>
 
                 <div className="footer">

@@ -9,10 +9,11 @@ class Category extends Model
 {
     use HasFactory;
     
-    protected $fillable = [ 'user_id', 'name' ];
+    protected $fillable = ['user_id', 'name'];
+    protected $hidden = ['user_id'];
 
     public function exercises() {
-        return $this->hasMany(Exercise::class);
+        return $this->hasMany(Exercise::class, 'id');
     }
 
     public function user() {

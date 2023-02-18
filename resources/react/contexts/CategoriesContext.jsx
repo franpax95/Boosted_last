@@ -26,9 +26,8 @@ function CategoriesProvider({ children }) {
     async function fetchCategories({ loading: haveLoading = true, toast: haveToast = true } = {}) {
         const data = await request('GET', '/api/categories', { haveLoading, failToast: haveToast ? '' : null })
             .then(data => {
-                const { categories } = data;
-                setCategoriesState(categories);
-                return categories;
+                setCategoriesState(data);
+                return data;
             })
             .catch(error => {
                 console.error(error);

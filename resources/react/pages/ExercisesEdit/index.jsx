@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { PrimaryButton, SecondaryButton } from '../../components/Button';
-import { CategoryToggle, PrimaryFileInput, PrimaryInput, PrimaryTextarea } from '../../components/Input';
+import { CategoryToggle, PrimaryImageInput, PrimaryInput, PrimaryTextarea } from '../../components/Input';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
 import { ExercisesContext } from '../../contexts/ExercisesContext';
 import { SettingsContext } from '../../contexts/SettingsContext';
-import { clone, deleteArrayElement, getBase64Type, getPromise } from '../../utils';
+import { clone, deleteArrayElement, getPromise } from '../../utils';
+import { getBase64Type } from '../../utils/files';
 import { StyledExercisesEdit } from './style';
 import { FaClone } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
@@ -208,7 +209,7 @@ export default function ExercisesEdit() {
                         label="Descripción"
                     />
 
-                    <PrimaryFileInput 
+                    <PrimaryImageInput 
                         id={`image`}
                         value={formController.image}
                         onChange={value => onFormGroupChange('image', value)}

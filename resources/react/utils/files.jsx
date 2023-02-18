@@ -1,5 +1,6 @@
 import mime from 'mime';
 import { fileTypeFromBuffer } from 'file-type';
+// import { Buffer } from 'buffer';
 
 /**
  * Convert a base64 file to a Blob file
@@ -103,8 +104,8 @@ export const getBase64ContentType = async b64 => {
  * Returns the extension and the Content Type of a base64.
  */
 export const getBase64MimeInfo = async b64 => {
-    const buffer = Buffer.from(b64, 'base64');
-    return fileTypeFromBuffer(buffer);
+    // const buffer = Buffer.from(b64, 'base64');
+    return fileTypeFromBuffer(b64);
 }
 
 /**

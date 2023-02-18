@@ -18,7 +18,7 @@ const SecondaryButton = lazy(() => import('../../components/Button').then(module
 const SuccessButton = lazy(() => import('../../components/Button').then(module => ({ default: module.SuccessButton })));
 const DangerButton = lazy(() => import('../../components/Button').then(module => ({ default: module.DangerButton })));
 const CategoryToggle = lazy(() => import('../../components/Input').then(module => ({ default: module.CategoryToggle })));
-const PrimaryFileInput = lazy(() => import('../../components/Input').then(module => ({ default: module.PrimaryFileInput })));
+const PrimaryFileInput = lazy(() => import('../../components/Input').then(module => ({ default: module.PrimaryImageInput })));
 const PrimaryInput = lazy(() => import('../../components/Input').then(module => ({ default: module.PrimaryInput })));
 const PrimaryTextarea = lazy(() => import('../../components/Input').then(module => ({ default: module.PrimaryTextarea })));
 
@@ -48,7 +48,7 @@ export default function Exercise() {
     /** Navigation */
     const navigate = useNavigate();
     /** Settings Context */
-    const { closeAllModal, openModal, setLoading } = useContext(SettingsContext);
+    const { openModal, setLoading } = useContext(SettingsContext);
     /** Categories Context */
     const { categories, fetchCategories, insertCategories, refresh: refreshCategories } = useContext(CategoriesContext);
     /** Categories Context */

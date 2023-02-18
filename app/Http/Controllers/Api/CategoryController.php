@@ -22,11 +22,8 @@ class CategoryController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $categories = Category::where('user_id', $user->id)->orderBy('name', 'asc')->get();
-
-        return response()->json([
-            'categories' => $categories
-        ], 200);
+        $categories = Category::with('exercises', 'user')->where('user_id', $user->id)->orderBy('name', 'asc')->get();
+        return response()->json($categories, 200);
     }
 
     /**

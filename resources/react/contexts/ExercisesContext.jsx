@@ -11,9 +11,9 @@ function ExercisesProvider({ children }) {
     /** Language */
     const { contexts: { Exercises: texts }} = useLanguage();
     /** Requests */
-    const { request, token } = useContext(FetchingContext);
+    const { request } = useContext(FetchingContext);
     /** Settings */
-    const { setLoading, theme, toastConfig } = useContext(SettingsContext);
+    const { setLoading, toastConfig } = useContext(SettingsContext);
     /** Ejercicios cargados en la aplicación */
     const [exercises, setExercisesState] = useState(null);
     /** Ejercicio cargado en la aplicación (para ver detalles de un ejercicio o editarlo) */
@@ -24,8 +24,7 @@ function ExercisesProvider({ children }) {
      */
     const parseExercise = exercise => ({
         ...exercise,
-        description: exercise.description || '',
-        image: exercise.image || ''
+        description: exercise.description || ''
     });
 
     /**
@@ -35,9 +34,8 @@ function ExercisesProvider({ children }) {
     async function fetchExercises({ loading: haveLoading = true, toast: haveToast = true } = {}) {
         const data = await request('GET', '/api/exercises', { haveLoading, failToast: haveToast ? '' : null })
             .then(data => {
-                const { exercises } = data;
-                setExercisesState(exercises.map(exercise => parseExercise(exercise)));
-                return exercises;
+                setExercisesState(data.map(exercise => parseExercise(exercise)));
+                return data;
             })
             .catch(error => {
                 setExercisesState([]);
