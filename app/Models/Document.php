@@ -12,8 +12,10 @@ class Document extends Model
     protected $fillable = ['name', 'base64'];
 
     public function exercise() {
-        return $this->belongsTo(Exercise::class);
+        return $this->belongsTo(Exercise::class, 'id');
     }
 
-
+    public function category() {
+        return $this->belongsTo(Category::class, 'id');
+    }
 }

@@ -22,7 +22,7 @@ class CategoryController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $categories = Category::with('exercises', 'user')->where('user_id', $user->id)->orderBy('name', 'asc')->get();
+        $categories = Category::with('exercises', 'user', 'image')->where('user_id', $user->id)->orderBy('name', 'asc')->get();
         return response()->json($categories, 200);
     }
 
@@ -55,24 +55,45 @@ class CategoryController extends Controller
         // $categoriesToInsert = array_map($cb, $validated);
 
         // Alternative manual validation because the Validator is not working, always fail
+        $errors = [];
         foreach ($request->all() as $category) {
+            // Name: required
             if (!isset($category['name']) || $category['name'] === '') {
                 return response()->json(["errors" => ["The field 'name' is required."]], 422);
             }
+
+            // Image name, image base64: required
+            if (isset($category['image']) && (!isset($category['image']['name']) || !isset($category['image']['base64']))) {
+                array_push($errors, "Some image or images are corrupted.");
+            }
+        }
+
+        // If errors, return
+        if (count($errors) > 0) {
+            return response()->json(["errors" => array_unique($errors)], 422);
         }
 
         // If valid, insert one by one
         $categories = [];
         foreach ($request->all() as $cat) {
+            // If the category have image, insert document first
+            $image = null;
+            if (isset($cat['image'])) {
+                $image = Document::create([
+                    'name' => $cat['image']['name'],
+                    'base64' => $cat['image']['base64'],
+                ]);
+            }
+
             $category = Category::create([
                 'name' => $cat['name'],
+                'document_id' => $image !== null ? $image['id'] : null,
                 'user_id' => $user->id
-            ]);
+            ])->load('image', 'exercises', 'user');
 
             array_push($categories, $category);
         }
 
-        // Return inserted rows
         return response()->json($categories, 200);
     }
 
@@ -85,9 +106,7 @@ class CategoryController extends Controller
     public function show($id)
     {
         try {
-            $category = Category::findOrFail($id);
-            $exercises = Exercise::where('category_id', $id)->orderBy('name', 'asc')->get();
-            $category->exercises = $exercises;
+            $category = Category::findOrFail($id)->load('exercises', 'user', 'image');
         } catch(ModelNotFoundException $e) {
             return response()->json(['error' => 'The category does not exist'], 401);
         } 
@@ -104,20 +123,39 @@ class CategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->validate($request, [
-            'name' => 'required'
-        ]);
+        $this->validate($request, ['name' => 'required']);
 
         try {
-            $category = Category::findOrFail($id);
-            $category->update($request->all());
+            $newCategory = $request->all();
+            $oldCategory = Category::findOrFail($id);
+
+            $image = null;
+            if (isset($newCategory['image']) && isset($oldCategory['image'])) {
+                $image = Document::findOrFail($oldCategory['image']['id']);
+                $image->update($newCategory['image']);
+
+            } else if (isset($newCategory['image']) && !isset($oldCategory['image'])) {
+                $image = Document::create([
+                    'name' => $newCategory['image']['name'],
+                    'base64' => $newCategory['image']['base64'],
+                ]);
+
+            } else if (!isset($newCategory['image']) && isset($oldCategory['image'])) {
+                $document = Document::findOrFail($oldCategory['image']['id']);
+                $document->delete();
+            }
+
+            $category->update([
+                'name' => $cat['name'],
+                'document_id' => $image !== null ? $image['id'] : null,
+            ]);
+
+            $category->load('exercises', 'user', 'image');
         } catch(ModelNotFoundException $e) {
             return response()->json(['error' => 'The category does not exist'], 401);
         } 
 
-        return response()->json([
-            'category' => $category
-        ], 200);
+        return response()->json($category, 200);
     }
 
     /**

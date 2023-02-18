@@ -46,9 +46,8 @@ function CategoriesProvider({ children }) {
         if (force === true || category === null || (category !== null && category.id !== id)) {
             const data = await request('GET', `/api/categories/${id}`, { haveLoading, failToast: haveToast ? '' : null })
                 .then(data => {
-                    const { category } = data;
-                    setCategoryState(category);
-                    return category;
+                    setCategoryState(data);
+                    return data;
                 })
                 .catch(error => {
                     console.error(error);

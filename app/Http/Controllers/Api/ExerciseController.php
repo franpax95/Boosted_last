@@ -44,6 +44,7 @@ class ExerciseController extends Controller
                 array_push($errors, "The field 'name' is required.");
             }
 
+            // Category: required
             if (!isset($exercise['category_id'])) {
                 array_push($errors, "The field 'category' is required.");
             }
@@ -54,6 +55,7 @@ class ExerciseController extends Controller
             }
         }
 
+        // If errors, return
         if (count($errors) > 0) {
             return response()->json(["errors" => array_unique($errors)], 422);
         }
