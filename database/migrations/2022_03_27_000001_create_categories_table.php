@@ -19,7 +19,11 @@ class CreateCategoriesTable extends Migration
             $table->bigInteger('document_id')->unsigned()->nullable();
             $table->string('name');
             $table->timestamps();
+
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('document_id')->references('id')->on('documents')->nullOnDelete();
+
+            $table->unique(['user_id', 'name']);
         });
     }
 
