@@ -13,7 +13,7 @@ export const StyledTable = styled.div`
     /** More than... */
     @media (min-width: ${media.sm}px) { width: 95%; }
 
-    &.categories { max-width: 800px; }
+    &.categories { max-width: 1000px; }
     &.exercises { max-width: 1350px; }
 
     .body {
@@ -139,10 +139,15 @@ export const StyledTable = styled.div`
         }
 
         &.category {
-            padding: 2rem 1rem;
-
             grid-template-columns: minmax(250px, 1fr);
             gap: 1rem;
+            align-items: center;
+
+            &:not(.header) {
+                height: 90px;
+                min-height: 90px;
+                max-height: 90px;
+            }
 
             .created_at,
             .updated_at {
@@ -151,7 +156,7 @@ export const StyledTable = styled.div`
 
             /** More than... */
             @media (min-width: ${media.md}px) {
-                grid-template-columns: minmax(250px, 1fr) minmax(175px, 1fr) minmax(175px, 1fr);
+                grid-template-columns: 100px minmax(250px, 2fr) minmax(150px, 1fr) minmax(150px, 1fr);
 
                 .created_at,
                 .updated_at {
@@ -225,11 +230,11 @@ export const StyledTable = styled.div`
 
     &.selection-mode {
         .category {
-            grid-template-columns: 50px minmax(250px, 1fr) minmax(175px, 1fr) minmax(175px, 1fr);
+            grid-template-columns: 50px 100px minmax(250px, 1fr);
 
             /** More than... */
             @media (min-width: ${media.md}px) {
-                grid-template-columns: 50px minmax(250px, 1fr) minmax(175px, 1fr) minmax(175px, 1fr);
+                grid-template-columns: 50px 100px minmax(250px, 2fr) minmax(150px, 1fr) minmax(150px, 1fr);
             }
         }
 

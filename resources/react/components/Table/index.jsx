@@ -6,6 +6,7 @@ import { PrimaryCheckbox } from '../Input';
 import { StyledTable } from './style';
 import { BsChevronDown } from 'react-icons/bs';
 import useLanguage from '../../hooks/useLanguage';
+import { Base64Image } from '../Image';
 
 export const CategoriesTable = memo(({ categories = [], selectionMode = false, onSelectedChange }) => {
     /** Header values to set sort by */
@@ -70,7 +71,7 @@ export const CategoriesTable = memo(({ categories = [], selectionMode = false, o
         }
     }
 
-    // Manejador de eventos 'click' de la cabecera
+    // 'Click' event handler for header columns
     const onHeaderClick = (event, header) => {
         if (sortBy === header) {
             setSortBy(`-${header}`);
@@ -85,6 +86,10 @@ export const CategoriesTable = memo(({ categories = [], selectionMode = false, o
         <StyledTable className={`categories ${selectionMode ? 'selection-mode' : ''}`}>
             <div className="row header category">
                 {selectionMode ? <div className="check"></div> : ''}
+
+                <div className="preview">
+                    <span>{texts.txt4}</span>
+                </div>
 
                 <div className="name" onClick={e => onHeaderClick(e, HEADERS.NAME)}>
                     <span>{texts.txt1}</span>
@@ -117,6 +122,10 @@ export const CategoriesTable = memo(({ categories = [], selectionMode = false, o
                         {selectionMode ? <div className="check">
                             <PrimaryCheckbox value={category.selected} onChange={e => onCheckboxChange(e, category.id)} />
                         </div> : ''}
+
+                        <div className="preview">
+                            {category.image && <Base64Image src={category.image.base64} alt={category.image.name} />}
+                        </div>
 
                         <div className="name">
                             <span>{category.name}</span>
@@ -199,7 +208,7 @@ export const ExercisesTable = memo(({ exercises = [], withCategories = false, se
         }
     }
 
-    // Manejador de eventos 'click' de la cabecera
+    // 'Click' event handler for header columns
     const onHeaderClick = (event, header) => {
         if (sortBy === header) {
             setSortBy(`-${header}`);
@@ -268,7 +277,7 @@ export const ExercisesTable = memo(({ exercises = [], withCategories = false, se
                         </div> : ''}
 
                         <div className="preview">
-                            {exercise.image && <img src={exercise.image} alt={exercise.name} />}
+                            {exercise.image && <Base64Image src={exercise.image} alt={exercise.name} />}
                         </div>
 
                         <div className="name">
