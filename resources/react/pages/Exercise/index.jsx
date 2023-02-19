@@ -9,9 +9,8 @@ import { beautifyDate } from '../../utils/dates';
 import { StyledExercise } from './style';
 import DarkIMG from '../../../images/athlete7-transparencies.png';
 import LightIMG from '../../../images/athlete8-transparencies.png';
+import { DetailsPageHeader } from '../../components/Header';
 
-const GradientBackground = lazy(() => import('../../components/Background').then(module => ({ default: module.GradientBackground })));
-const ImageBackground = lazy(() => import('../../components/Background').then(module => ({ default: module.ImageBackground })));
 const PrimaryButton = lazy(() => import('../../components/Button').then(module => ({ default: module.PrimaryButton })));
 const SecondaryButton = lazy(() => import('../../components/Button').then(module => ({ default: module.SecondaryButton })));
 const SuccessButton = lazy(() => import('../../components/Button').then(module => ({ default: module.SuccessButton })));
@@ -216,48 +215,20 @@ export default function Exercise() {
     return (
         <Suspense>
             <StyledExercise>
-                <header>
-                    <GradientBackground
-                        className="bg1"
-                        dark="linear-gradient(60deg, #2C394B 0%, #082032 100%)"
-                        light="linear-gradient(to top, #F9F6F7 0%, #F0F0F0 100%)"
-                    />
-
-                    <div className="info">
-                        <h1 className="info-title">{texts.txt1}</h1>
-
-                        <p className="info-body">{texts.txt2}</p>
-
-                        <p className="info-footer">{texts.txt3}</p>
-                    </div>
-
-                    <div className="backgrounds">
-                        <GradientBackground
-                            className="bg1"
-                            dark="linear-gradient(0deg, rgba(127,186,18,0.33) 0%, rgba(127,186,18,1) 100%)"
-                            light="linear-gradient(0deg, rgba(58,93,223,0.33) 0%, rgba(58,93,223,1) 100%)"
-                        />
-
-                        <ImageBackground 
-                            className="bg2"
-                            objectFit="contain"
-                            light={LightIMG}
-                            dark={DarkIMG}
-                        />
-
-                        <GradientBackground
-                            className="bg3"
-                            dark="linear-gradient(0deg, rgba(127,186,18,1) 0%, rgba(127,186,18,0.33) 100%)"
-                            light="linear-gradient(0deg, rgba(58,93,223,1) 0%, rgba(58,93,223,0.33) 100%)"
-                        />
-                    </div>
-                </header>
+                <DetailsPageHeader 
+                    title={texts.txt1}
+                    body={texts.txt2}
+                    footer={texts.txt3}
+                    lightIMG={LightIMG}
+                    darkIMG={DarkIMG}
+                    reverse
+                />
 
                 <br ref={ref} />
 
                 <div className="slider">
                     <div className={`card left ${showForm ? '' : 'active'}`}>
-                        <div className="exercise-info">
+                        <div className="details-info">
                             <h1 className="title">{texts.txt4}</h1>
 
                             <div className="group name">
@@ -302,7 +273,7 @@ export default function Exercise() {
                     </div>
 
                     <div className={`card right ${showForm ? 'active' : ''}`}>
-                        <div className="exercise-form">
+                        <div className="details-form">
                             <h1 className="title">{texts.txt12}</h1>
 
                             {formController !== null ? <form onSubmit={onSubmit}>

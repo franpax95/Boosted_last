@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class CategoryController extends Controller
 {
@@ -115,7 +116,9 @@ class CategoryController extends Controller
             array_push($categoriesToInsert, [
                 'name' => $category['name'],
                 'document_id' => isset($image) ? $image['id'] : null,
-                'user_id' => $user->id
+                'user_id' => $user->id,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
             ]);
         }
 

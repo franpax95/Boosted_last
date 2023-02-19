@@ -12,8 +12,7 @@ const ExercisesTable = lazy(() => import('../../components/Table').then(module =
 const SearchBar = lazy(() => import('../../components/Input').then(module => ({ default: module.SearchBar })));
 const PrimaryLink = lazy(() => import('../../components/Anchor').then(module => ({ default: module.PrimaryLink })));
 const DangerButton = lazy(() => import('../../components/Button').then(module => ({ default: module.DangerButton })));
-const GradientBackground = lazy(() => import('../../components/Background').then(module => ({ default: module.GradientBackground })));
-const ImageBackground = lazy(() => import('../../components/Background').then(module => ({ default: module.ImageBackground })));
+const CollectionPageHeader = lazy(() => import('../../components/Header').then(module => ({ default: module.CollectionPageHeader })));
 
 export default function Exercises() {
     /** Categories Context */
@@ -122,42 +121,14 @@ export default function Exercises() {
     return (
         <Suspense>
             <StyledExercises>
-                <header>
-                    <GradientBackground
-                        className="bg1"
-                        dark="linear-gradient(60deg, #2C394B 0%, #082032 100%)"
-                        light="linear-gradient(to top, #F9F6F7 0%, #F0F0F0 100%)"
-                    />
-
-                    <div className="info">
-                        <h1 className="info-title">{texts.txt8}</h1>
-
-                        <p className="info-body">{texts.txt9}</p>
-
-                        <p className="info-footer">{texts.txt10}</p>
-                    </div>
-
-                    <div className="backgrounds">
-                        <GradientBackground
-                            className="bg1"
-                            dark="linear-gradient(0deg, rgba(127,186,18,0.33) 0%, rgba(127,186,18,1) 100%)"
-                            light="linear-gradient(0deg, rgba(58,93,223,0.33) 0%, rgba(58,93,223,1) 100%)"
-                        />
-
-                        <ImageBackground 
-                            className="bg2"
-                            objectFit="contain"
-                            light={LightIMG}
-                            dark={DarkIMG}
-                        />
-
-                        <GradientBackground
-                            className="bg3"
-                            dark="linear-gradient(0deg, rgba(127,186,18,1) 0%, rgba(127,186,18,0.33) 100%)"
-                            light="linear-gradient(0deg, rgba(58,93,223,1) 0%, rgba(58,93,223,0.33) 100%)"
-                        />
-                    </div>
-                </header>
+                <CollectionPageHeader 
+                    title={texts.txt8}
+                    body={texts.txt9}
+                    footer={texts.txt10}
+                    lightIMG={LightIMG}
+                    darkIMG={DarkIMG}
+                    reverse
+                />
 
                 <h1 className="title">{texts.txt2}</h1>
 

@@ -216,7 +216,7 @@ export const PrimaryImageInput = ({ id = '', className = '', name = '', value = 
             const newImage = { name: original.name, base64: base64.split(',')[1] };
 
             if (onChange) {
-                console.dir(newImage);
+                // console.dir(newImage);
                 onChange(newImage);
             }
 
