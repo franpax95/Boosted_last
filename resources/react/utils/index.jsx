@@ -1,18 +1,3 @@
-
-export const beautifyDate = str => {
-    const date = new Date(str);
-
-    const yyyy = date.getFullYear().toString().padStart(4, "0");
-    const mm = (date.getMonth() + 1).toString().padStart(2, "0");
-    const dd = date.getDate().toString().padStart(2, "0");
-
-    const hh = date.getHours().toString().padStart(2, "0");
-    const mn = date.getMinutes().toString().padStart(2, "0");
-
-
-    return `${dd}-${mm}-${yyyy} ${hh}:${mn}`;
-}
-
 /**
  * Crea una copia de un objeto
  * 
@@ -60,33 +45,6 @@ export const deleteArrayElement = (arr, i) => {
     let array = arr.slice();
     array.splice(i, 1);
     return array;
-}
-
-/**
- * Devuelve una promesa para transformar un File en un string base64
- * @param file 
- * @returns 
- */
-export const fileToBase64 = file => (new Promise((resolve, reject) => {
-    var reader = new FileReader();
-    reader.readAsDataURL(file);
-
-    reader.onload = function() {
-        resolve(reader.result);
-    }
-
-    reader.onerror = function(error) {
-        reject(error);
-    }
-}));
-
-/**
- * Devuelve el formato del base64 pasado por parámetro
- */
-export const getBase64Type = b64 => {
-    const [firstPart] = b64.split(";");
-    const [data, type] = firstPart.split(":");
-    return type;
 }
 
 /**

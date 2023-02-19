@@ -26,9 +26,8 @@ function CategoriesProvider({ children }) {
     async function fetchCategories({ loading: haveLoading = true, toast: haveToast = true } = {}) {
         const data = await request('GET', '/api/categories', { haveLoading, failToast: haveToast ? '' : null })
             .then(data => {
-                const { categories } = data;
-                setCategoriesState(categories);
-                return categories;
+                setCategoriesState(data);
+                return data;
             })
             .catch(error => {
                 console.error(error);
@@ -47,9 +46,8 @@ function CategoriesProvider({ children }) {
         if (force === true || category === null || (category !== null && category.id !== id)) {
             const data = await request('GET', `/api/categories/${id}`, { haveLoading, failToast: haveToast ? '' : null })
                 .then(data => {
-                    const { category } = data;
-                    setCategoryState(category);
-                    return category;
+                    setCategoryState(data);
+                    return data;
                 })
                 .catch(error => {
                     console.error(error);
@@ -65,8 +63,7 @@ function CategoriesProvider({ children }) {
 
     /**
      * Insert a collection of categories. 
-     * If inserted correctly, update categories list state.
-     * Returns the recently inserted categories.
+     * Returns the recently inserted data.
      */
     async function insertCategories({ categories, loading: haveLoading = true, toast: haveToast = true, refresh: shouldRefresh = true } = {}) {
         const successMessage = texts.txt1;

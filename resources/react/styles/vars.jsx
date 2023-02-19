@@ -58,10 +58,9 @@ export const secondaryDarkDisabled = addOpacityToHex(secondaryDark, .6);
 export const tertiaryDarkDisabled = addOpacityToHex(tertiaryDark, .6);
 export const quaternaryDarkDisabled = addOpacityToHex(quaternaryDark, .6);
 
-
 export default {
     /**
-     * Paleta de colores
+     * Color palette
      */
     color: {
         facebook: '#3F62A9',

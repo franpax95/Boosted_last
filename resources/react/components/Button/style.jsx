@@ -1,8 +1,8 @@
 import styled, { css } from 'styled-components';
 import theme from 'styled-theming';
 import { THEME } from '../../states/theming';
-import styles, { primaryDarkActive, primaryDarkHover, primaryLightActive, primaryLightHover, quaternaryLight, secondaryDarkActive, secondaryDarkHover, secondaryLightActive, secondaryLightHover, tertiaryDarkActive, tertiaryDarkHover, tertiaryLightActive, tertiaryLightHover, textDark, textLight } from '../../styles/vars';
-import { addOpacityToHex, darken, lighten } from '../../styles/utils';
+import styles, { textDark, textLight } from '../../styles/vars';
+import { darken, lighten } from '../../styles/utils';
 
 const { color, font, media, transitionDuration } = styles;
 const { primary, secondary, tertiary, quaternary, success, danger } = color;
@@ -379,6 +379,146 @@ const btnCommonCSS = css`
     &:disabled {
         cursor: not-allowed;
     }
+
+    &.tooltip {
+        position: relative;
+
+        &:before, 
+        &:after {
+            pointer-events: none;
+            user-select: none;
+            z-index: 10;
+
+            position: absolute;
+
+            cursor: default;
+            opacity: 0;
+            background: ${primary.default};
+            color: #ffffff;
+
+            transition: 
+                opacity .25s linear .25s, 
+                background-color ${transitionDuration},
+                color ${transitionDuration};
+        }
+
+        &:before {
+            content: '${props => props.tooltip}';
+
+            max-width: 350px;
+            max-width: max(200%, 350px);
+            min-width: 50px;
+            width: max-content;
+            padding: .5rem 1rem;
+
+            border-radius: 10px;
+
+            text-align: center;
+            text-transform: initial;
+            font-family: 'Montserrat';
+            font-weight: normal;
+            font-size: ${font.md};
+        }
+
+        &:after {
+            content: ' ';
+            
+            &.top,
+            &.bottom {
+                width: 12px;
+                height: 8px;
+            }
+
+            &.left,
+            &.right {
+                width: 8px;
+                height: 12px;
+            }
+        }
+
+        &.top {
+            &:before {
+                bottom: 103%;
+                bottom: calc(100% + 13px);
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            &:after {
+                width: 12px;
+                height: 8px;
+                clip-path: polygon(0 0, 50% 100%, 100% 0);
+                bottom: 101%;
+                bottom: calc(100% + 5px);
+                left: 50%;
+                transform: translateX(-50%) rotate(0deg);
+            }
+        }
+
+        &.bottom {
+            &:before {
+                top: 103%;
+                top: calc(100% + 13px);
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            &:after {
+                width: 12px;
+                height: 8px;
+                clip-path: polygon(0 100%, 50% 0, 100% 100%);
+                top: 101%;
+                top: calc(100% + 5px);
+                left: 50%;
+                transform: translateX(-50%) rotate(0deg);
+            }
+        }
+
+        &.left {
+            &:before {
+                right: 103%;
+                right: calc(100% + 13px);
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            &:after {
+                width: 8px;
+                height: 12px;
+                clip-path: polygon(0 0, 0% 100%, 100% 50%);
+                right: 101%;
+                right: calc(100% + 5px);
+                top: 50%;
+                transform: translateY(-50%) rotate(0deg);
+            }
+        }
+
+        &.right {
+            &:before {
+                left: 103%;
+                left: calc(100% + 13px);
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            &:after {
+                width: 8px;
+                height: 12px;
+                clip-path: polygon(0 50%, 100% 0, 100% 100%);
+                left: 101%;
+                left: calc(100% + 5px);
+                top: 50%;
+                transform: translateY(-50%) rotate(0deg);
+            }
+        }
+
+        &:hover:before,
+        &:hover:after {
+            pointer-events: initial;
+            opacity: 1;
+            transition-delay: .75s;
+        }
+    }
 `;
 
 export const PrimaryButtonCSS = css`
@@ -435,6 +575,14 @@ export const SecondaryButtonCSS = css`
     &:disabled {
         background-color: ${secondary.disabled};
     }
+
+    &.tooltip {
+        &:before, 
+        &:after {
+            background: ${secondary.default};
+            color: ${theme('mode', { [THEME.LIGHT]: '#4d4d4d', [THEME.DARK]: '#fff' })};
+        }
+    }
 `;
 
 export const StyledSecondaryButton = styled.button`
@@ -460,6 +608,13 @@ export const TertiaryButtonCSS = css`
 
     &:disabled {
         background-color: ${tertiary.disabled};
+    }
+
+    &.tooltip {
+        &:before, 
+        &:after {
+            background: ${tertiary.default};
+        }
     }
 `;
 
@@ -488,6 +643,13 @@ export const SuccessButtonCSS = css`
     &:disabled {
         background-color: ${success.disabled};
     }
+
+    &.tooltip {
+        &:before, 
+        &:after {
+            background: ${success.default};
+        }
+    }
 `;
 
 export const StyledSuccessButton = styled.button`
@@ -514,6 +676,13 @@ export const DangerButtonCSS = css`
 
     &:disabled {
         background-color: ${danger.disabled};
+    }
+
+    &.tooltip {
+        &:before, 
+        &:after {
+            background: ${danger.default};
+        }
     }
 `;
 

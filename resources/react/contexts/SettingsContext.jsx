@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { useEffect } from 'react';
 import { ThemeProvider } from 'styled-components';
 import { LANG } from '../states/lang';
 import { STORAGE } from '../states/storage';
 import { THEME } from '../states/theming';
-import { clone, deleteArrayElement, getRandomArbitrary, validateState } from '../utils';
+import { deleteArrayElement, getRandomArbitrary, validateState } from '../utils';
 
 const SettingsContext = React.createContext([{}, () => {}]);
 

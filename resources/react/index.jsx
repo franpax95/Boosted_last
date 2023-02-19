@@ -13,6 +13,10 @@ import App from './components/App';
 import './styles/fonts.css';
 import { FetchingProvider } from './contexts/FetchContext';
 
+
+// import { Buffer } from 'buffer'
+// globalThis.Buffer = Buffer
+
 const app = ReactDOMClient.createRoot(document.getElementById('root'));
 
 // Kaaaameeee, haaaaaa meeee.....

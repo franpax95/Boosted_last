@@ -1,15 +1,10 @@
 import styled from 'styled-components';
-import theme from 'styled-theming';
-import { THEME } from '../../states/theming';
-import styles from '../../styles';
+import styles from '../../styles/vars';
 import { PrimaryButtonCSS } from '../Button/style';
 import { Link } from 'react-router-dom';
 
 const { color, font, media, transitionDuration } = styles;
-const { [THEME.LIGHT]: primaryLight, [THEME.DARK]: primaryDark } = color.primary;
-const { [THEME.LIGHT]: secondaryLight, [THEME.DARK]: secondaryDark } = color.secondary;
-const { [THEME.LIGHT]: tertiaryLight, [THEME.DARK]: tertiaryDark } = color.tertiary;
-const { [THEME.LIGHT]: quaternaryLight, [THEME.DARK]: quaternaryDark } = color.quaternary;
+const { primary, secondary, tertiary, quaternary } = color;
 
 export const StyledPrimaryLink = styled(Link)`
     ${PrimaryButtonCSS};
@@ -33,10 +28,10 @@ export const StyledAnimatedRowLink = styled(Link)`
         justify-content: flex-start;
         align-items: center;
 
-        border-right: solid 1px ${theme('mode', { [THEME.LIGHT]: quaternaryLight.default, [THEME.DARK]: quaternaryDark.default })};
-        border-bottom: solid 1px ${theme('mode', { [THEME.LIGHT]: quaternaryLight.default, [THEME.DARK]: quaternaryDark.default })};
-        background-color: ${theme('mode', { [THEME.LIGHT]: primaryLight.default, [THEME.DARK]: primaryDark.default })};
-        color: ${theme('mode', { [THEME.LIGHT]: quaternaryLight.default, [THEME.DARK]: quaternaryDark.default })};
+        border-right: solid 1px ${quaternary.default};
+        border-bottom: solid 1px ${quaternary.default};
+        background-color: ${primary.default};
+        color: ${quaternary.default};
 
         font-size: ${font.lg};
         font-weight: bold;
@@ -65,7 +60,7 @@ export const StyledAnimatedRowLink = styled(Link)`
         justify-content: flex-end;
         align-items: flex-end;
 
-        background-color: ${theme('mode', { [THEME.LIGHT]: quaternaryLight.default, [THEME.DARK]: quaternaryDark.default })};
+        background-color: ${quaternary.default};
 
         transition:
             background-color ${transitionDuration},
@@ -73,7 +68,7 @@ export const StyledAnimatedRowLink = styled(Link)`
             padding ${transitionDuration};
 
         .icon {
-            color: ${theme('mode', { [THEME.LIGHT]: primaryLight.default, [THEME.DARK]: primaryDark.default })};
+            color: ${primary.default};
             font-size: ${font.lg};
         }
     }

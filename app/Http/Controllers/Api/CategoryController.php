@@ -6,11 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Exercise;
 use App\Models\Category;
 use App\Models\User;
+use App\Models\Document;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class CategoryController extends Controller
 {
@@ -22,11 +26,12 @@ class CategoryController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $categories = Category::where('user_id', $user->id)->orderBy('name', 'asc')->get();
+        $categories = Category::with('exercises', 'user', 'image')
+            ->where('user_id', $user->id)
+            // ->orderBy('name', 'asc')
+            ->get();
 
-        return response()->json([
-            'categories' => $categories
-        ], 200);
+        return response()->json($categories, 200);
     }
 
     /**
@@ -35,48 +40,99 @@ class CategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request) 
     {
         $user = Auth::user();
 
-        // $cb = function($category) use ($user) {
-        //     return ([
-        //         'name' => $category['name'],
-        //         'user_id' => $user->id
-        //     ]);
-        // };
+        $categories = array_map(function ($category) use ($user) {
+            return [
+                'name' => $category['name'],
+                'image' => $category['image'],
+                'user_id' => $user->id
+            ];
+        }, $request->all());
+        
+        $errors = [];
+        foreach ($categories as $category) {
+            if (isset($category['image'])) {
+                $validator = Validator::make($category, ['name' => ['required', Rule::unique('categories')->where(function ($query) use ($user) {
+                    return $query->where('user_id', $user->id);
+                })], 'image.name' => 'required', 'image.base64' => 'required']);
 
-        // $validator = Validator::make($request->all(), ['name' => 'required']); //->validate();
-        // if ($validator->fails()) {
-        //     return response()->json([
-        //         'errors' => $validator->errors(),
-        //         'request' => $request->all(),
-        //         'data2insert' => array_map($cb, $request->all())
-        //     ], 422);
-        // }
-        // $validated = $validator->validated();
-        // $categoriesToInsert = array_map($cb, $validated);
+                if ($validator->fails()) {
+                    $errorsRow = [];
 
-        // Alternative manual validation because the Validator is not working, always fail
-        foreach ($request->all() as $category) {
-            if (!isset($category['name']) || $category['name'] == '') {
-                return response()->json(["error" => "The field 'name' is required."], 422);
+                    $errName = $validator->errors()->first('name');
+                    if (!empty($errName)) {
+                        $errorsRow['name'] = $errName;
+                    }
+
+                    $errImgName = $validator->errors()->first('image.name');
+                    $errImgB64 = $validator->errors()->first('image.base64');
+                    if (!empty($errImgName) || !empty($errImgB64)) {
+                        $errorsRow['image'] = 'Image bad formed.';
+                    }
+
+                    array_push($errors, $errorsRow);
+                } else {
+                    array_push($errors, (object)[]);
+                }
+            } else {
+                $validator = Validator::make($category, [
+                    'name' => ['required', Rule::unique('categories')->where(function ($query) use ($user) {
+                        return $query->where('user_id', $user->id);
+                    })]
+                ]);
+
+                if ($validator->fails()) {
+                    array_push($errors, ['name' => $validator->errors()->first('name')]);
+                } else {
+                    array_push($errors, (object)[]);
+                }
             }
         }
 
-        // If valid, insert one by one
-        $categories = [];
-        foreach ($request->all() as $category) {
-            $category = Category::create([
-                'name' => $category['name'],
-                'user_id' => $user->id
-            ]);
+        // If errors, return
+        $filteredErrors = array_filter($errors, function($error) {
+            return count((array)$error) > 0;
+        });
 
-            array_push($categories, $category);
+        if (count($filteredErrors) > 0) {
+            return response()->json(["errors" => $errors], 422);
         }
 
-        // Return inserted rows
-        return response()->json($categories, 200);
+        // Insert images one by one to obtain the ids easily
+        $categoriesToInsert = [];
+        foreach ($categories as $category) {
+            $image = null;
+
+            if (isset($category['image'])) {
+                $image = Document::create([
+                    'name' => $category['image']['name'],
+                    'base64' => $category['image']['base64'],
+                ]);
+            }
+
+            array_push($categoriesToInsert, [
+                'name' => $category['name'],
+                'document_id' => isset($image) ? $image['id'] : null,
+                'user_id' => $user->id,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
+            ]);
+        }
+
+        $inserted = Category::insert($categoriesToInsert);
+        if (!$inserted) {
+            return response()->json(null, 500);
+        }
+
+        $categoriesInserted = Category::with('exercises', 'user', 'image')
+            ->where('user_id', $user->id)
+            ->whereIn('name', array_map(function ($category) { return $category['name']; }, $categories))
+            ->get();
+
+        return response()->json($categoriesInserted, 200);
     }
 
     /**
@@ -88,16 +144,12 @@ class CategoryController extends Controller
     public function show($id)
     {
         try {
-            $category = Category::findOrFail($id);
-            $exercises = Exercise::where('category_id', $id)->orderBy('name', 'asc')->get();
-            $category->exercises = $exercises;
-        } catch(ModelNotFoundException $e) {
+            $category = Category::findOrFail($id)->load('exercises', 'user', 'image');
+        } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'The category does not exist'], 401);
         } 
 
-        return response()->json([
-            'category' => $category
-        ], 200);
+        return response()->json($category, 200);
     }
 
     /**
@@ -109,20 +161,62 @@ class CategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->validate($request, [
-            'name' => 'required'
-        ]);
+        $user = Auth::user();
+        $newCategory = $request->all();
+        $errors = [];
+
+        $validator = Validator::make($newCategory, ['name' => ['required', Rule::unique('categories')->where(function ($query) use ($user, $id) {
+            return $query->where('user_id', $user->id)->where('id', '!=', $id);
+        })]]);
+
+        if ($validator->fails()) {
+            $errName = $validator->errors()->first('name');
+            if (!empty($errName)) {
+                $errors['name'] = $errName;
+            }
+        }
+
+        if (isset($newCategory['image'])) {
+            $validatorDoc = Validator::make($newCategory['image'], ['name' => 'required', 'base64' => 'required']);
+            if ($validatorDoc->fails()) {
+                $errors['image'] = 'Image bad formed.';
+            }
+        }
+
+        if (count((array)$errors) > 0) {
+            return response()->json($errors, 422);
+        }
 
         try {
             $category = Category::findOrFail($id);
-            $category->update($request->all());
-        } catch(ModelNotFoundException $e) {
-            return response()->json(['error' => 'The category does not exist'], 401);
+
+            $image = null;
+            if (isset($newCategory['image']) && isset($category['image'])) {
+                $image = Document::findOrFail($category['image']['id']);
+                $image->update($newCategory['image']);
+
+            } else if (isset($newCategory['image']) && !isset($category['image'])) {
+                $image = Document::create([
+                    'name' => $newCategory['image']['name'],
+                    'base64' => $newCategory['image']['base64'],
+                ]);
+
+            } else if (!isset($newCategory['image']) && isset($category['image'])) {
+                $document = Document::findOrFail($category['image']['id']);
+                $document->delete();
+            }
+
+            $category->update([
+                'name' => $newCategory['name'],
+                'document_id' => $image !== null ? $image['id'] : null,
+            ]);
+
+            $category->load('exercises', 'user', 'image');
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Cannot retrieve data.'], 401);
         } 
 
-        return response()->json([
-            'category' => $category
-        ], 200);
+        return response()->json($category, 200);
     }
 
     /**

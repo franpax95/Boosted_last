@@ -8,7 +8,6 @@ import styles, { quaternaryDark, quaternaryLight } from '../../styles/vars';
 const { color, font, media, transitionDuration } = styles;
 const { primary, secondary, tertiary, quaternary, success, danger } = color;
 
-
 export const StyledInput = styled.input`
     width: 100%;
     padding: .25rem .5rem;

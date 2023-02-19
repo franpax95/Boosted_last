@@ -1,14 +1,11 @@
 import styled, { keyframes } from 'styled-components';
-import theme from 'styled-theming';
+import styles, { quaternaryLight, quaternaryDark } from '../../styles/vars';
+import { addOpacityToHex } from '../../styles/utils';
 import { THEME } from '../../states/theming';
-import styles from '../../styles';
-import { addOpacityToHex, darken, lighten } from '../../styles/utils';
+import theme from 'styled-theming';
 
 const { color, font, media, transitionDuration } = styles;
-const { [THEME.LIGHT]: primaryLight, [THEME.DARK]: primaryDark } = color.primary;
-const { [THEME.LIGHT]: secondaryLight, [THEME.DARK]: secondaryDark } = color.secondary;
-const { [THEME.LIGHT]: tertiaryLight, [THEME.DARK]: tertiaryDark } = color.tertiary;
-const { [THEME.LIGHT]: quaternaryLight, [THEME.DARK]: quaternaryDark } = color.quaternary;
+const { primary, secondary, tertiary, quaternary } = color;
 
 const ldsRingAnimation = keyframes`
     0% {
@@ -37,9 +34,9 @@ export const StyledSpinner = styled.div`
 
         display: block;
         
-        border: 8px solid ${theme('mode', { [THEME.LIGHT]: primaryLight.default, [THEME.DARK]: primaryDark.default })};
-        border: ${props => props.size ? `${1 * props.size}px` : '8px'} solid ${theme('mode', { [THEME.LIGHT]: primaryLight.default, [THEME.DARK]: primaryDark.default })};
-        border-color: ${theme('mode', { [THEME.LIGHT]: primaryLight.default, [THEME.DARK]: primaryDark.default })} transparent transparent transparent;
+        border: 8px solid ${primary.default};
+        border: ${props => props.size ? `${1 * props.size}px` : '8px'} solid ${primary.default};
+        border-color: ${primary.default} transparent transparent transparent;
         border-radius: 50%;
         
         animation: ${ldsRingAnimation} 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;

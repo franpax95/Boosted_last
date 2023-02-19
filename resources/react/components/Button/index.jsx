@@ -20,24 +20,24 @@ export const AnimatedButton = ({ type, className = '', onClick, disabled, childr
     </StyledAnimatedButton>;
 }
 
-export const PrimaryButton = ({ type, className = '', onClick, disabled, children }) => {
-    return <StyledPrimaryButton type={type} className={className} onClick={onClick} disabled={disabled}>{ children }</StyledPrimaryButton>;
+export const PrimaryButton = ({ type, className = '', onClick, disabled, tooltip = '', tooltipPlacement = 'top', children }) => {
+    return <StyledPrimaryButton type={type} className={`${className} ${tooltip !== '' ? `tooltip ${tooltipPlacement}` : ''}`} onClick={onClick} disabled={disabled} tooltip={tooltip}>{ children }</StyledPrimaryButton>;
 }
 
-export const SecondaryButton = ({ type, className = '', onClick, disabled, children }) => {
-    return <StyledSecondaryButton type={type} className={className} onClick={onClick} disabled={disabled}>{ children }</StyledSecondaryButton>;
+export const SecondaryButton = ({ type, className = '', onClick, disabled, tooltip = '', tooltipPlacement = 'top', children }) => {
+    return <StyledSecondaryButton type={type} className={`${className} ${tooltip !== '' ? `tooltip ${tooltipPlacement}` : ''}`} onClick={onClick} disabled={disabled} tooltip={tooltip}>{ children }</StyledSecondaryButton>;
 }
 
-export const TertiaryButton = ({ type, className = '', onClick, disabled, children }) => {
-    return <StyledTertiaryButton type={type} className={className} onClick={onClick} disabled={disabled}>{ children }</StyledTertiaryButton>;
+export const TertiaryButton = ({ type, className = '', onClick, disabled, tooltip = '', tooltipPlacement = 'top', children }) => {
+    return <StyledTertiaryButton type={type} className={`${className} ${tooltip !== '' ? `tooltip ${tooltipPlacement}` : ''}`} onClick={onClick} disabled={disabled} tooltip={tooltip}>{ children }</StyledTertiaryButton>;
 }
 
-export const SuccessButton = ({ type, className = '', onClick, disabled, children }) => {
-    return <StyledSuccessButton type={type} className={className} onClick={onClick} disabled={disabled}>{ children }</StyledSuccessButton>;
+export const SuccessButton = ({ type, className = '', onClick, disabled, tooltip = '', tooltipPlacement = 'top', children }) => {
+    return <StyledSuccessButton type={type} className={`${className} ${tooltip !== '' ? `tooltip ${tooltipPlacement}` : ''}`} onClick={onClick} disabled={disabled} tooltip={tooltip}>{ children }</StyledSuccessButton>;
 }
 
-export const DangerButton = ({ type, className = '', onClick, disabled, children }) => {
-    return <StyledDangerButton type={type} className={className} onClick={onClick} disabled={disabled}>{ children }</StyledDangerButton>;
+export const DangerButton = ({ type, className = '', onClick, disabled, tooltip = '', tooltipPlacement = 'top', children }) => {
+    return <StyledDangerButton type={type} className={`${className} ${tooltip !== '' ? `tooltip ${tooltipPlacement}` : ''}`} onClick={onClick} disabled={disabled} tooltip={tooltip}>{ children }</StyledDangerButton>;
 }
 
 export const BurgerButton = ({ active, onClick, disabled, className = '' }) => {

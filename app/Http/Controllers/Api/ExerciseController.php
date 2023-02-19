@@ -6,11 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Exercise;
 use App\Models\Category;
 use App\Models\User;
+use App\Models\Document;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-
 
 class ExerciseController extends Controller
 {
@@ -21,26 +21,9 @@ class ExerciseController extends Controller
      */
     public function index()
     {
-        // Recogemos el usuario y pedimos los ejercicios y las categorías asociadas a este
         $user = Auth::user();
-        $exercises = Exercise::where('user_id', $user->id)->orderBy('name', 'asc')->get();
-        $categories = Category::where('user_id', $user->id)->get();
-
-        // Creamos un array que sirva para parsear los nombres de categorías mediante clave-valor
-        $parser = [];
-        foreach($categories as $category) {
-            $parser[$category->id] = $category->name;
-        }
-
-        // Recorremos los ejercicios y añadimos el nombre de la categoría según corresponda mediante el parser
-        foreach($exercises as $exercise) {
-            $exercise->category_name = $parser[$exercise->category_id];
-        }
-
-        // Devolvemos los ejercicios
-        return response()->json([
-            'exercises' => $exercises
-        ], 200);
+        $exercises = Exercise::with('image', 'category', 'user')->where('user_id', $user->id)->orderBy('name', 'asc')->get();
+        return response()->json($exercises, 200);
     }
 
     /**
@@ -51,17 +34,56 @@ class ExerciseController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validate($request, [
-            'name' => 'required',
-            'category_id' => 'required'
-        ]);
-
         $user = Auth::user();
-        $exercise = Exercise::create(['user_id' => $user->id] + $request->all());
 
-        return response()->json([
-            'exercise' => $exercise
-        ], 200);
+        // Alternative manual validation because the Validator is not working, always fail
+        $errors = [];
+        foreach ($request->all() as $exercise) {
+            // Name: required
+            if (!isset($exercise['name']) || $exercise['name'] === '') {
+                array_push($errors, "The field 'name' is required.");
+            }
+
+            // Category: required
+            if (!isset($exercise['category_id'])) {
+                array_push($errors, "The field 'category' is required.");
+            }
+
+            // Image name, image base64: required
+            if (isset($exercise['image']) && (!isset($exercise['image']['name']) || !isset($exercise['image']['base64']))) {
+                array_push($errors, "Some image or images are corrupted.");
+            }
+        }
+
+        // If errors, return
+        if (count($errors) > 0) {
+            return response()->json(["errors" => array_unique($errors)], 422);
+        }
+
+        // If valid, insert one by one
+        $exercises = [];
+        foreach ($request->all() as $ex) {
+            // If the exercise have image, insert document first
+            $image = null;
+            if (isset($ex['image'])) {
+                $image = Document::create([
+                    'name' => $ex['image']['name'],
+                    'base64' => $ex['image']['base64'],
+                ]);
+            }
+
+            $exercise = Exercise::create([
+                'name' => $ex['name'],
+                'description' => $ex['description'],
+                'category_id' => $ex['category_id'],
+                'document_id' => $image !== null ? $image['id'] : null,
+                'user_id' => $user->id
+            ])->load('image', 'category', 'user');
+
+            array_push($exercises, $exercise);
+        }
+
+        return response()->json($exercises, 200);
     }
 
     /**
@@ -74,21 +96,19 @@ class ExerciseController extends Controller
     {
         try {
             // Buscamos el ejercicio
-            $exercise = Exercise::findOrFail($id);
+            $exercise = Exercise::findOrFail($id)->load('image', 'category', 'user');
 
-            // Buscamos la categoría asociada al ejercicio
-            $category = Category::findOrFail($exercise->category_id);
+            // // Buscamos la categoría asociada al ejercicio
+            // $category = Category::findOrFail($exercise->category_id);
 
-            // Añadimos el nombre de la categoría al ejercicio
-            $exercise->category_name = $category->name;
+            // // Añadimos el nombre de la categoría al ejercicio
+            // $exercise->category_name = $category->name;
 
         } catch(ModelNotFoundException $e) {
             return response()->json(['error' => 'The exercise does not exist'], 401);
         } 
 
-        return response()->json([
-            'exercise' => $exercise
-        ], 200);
+        return response()->json($exercise, 200);
     }
 
     /**

@@ -17,7 +17,7 @@ class CreateExercisesTable extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->longText('image')->nullable();
+            $table->bigInteger('document_id')->unsigned()->nullable();
             $table->bigInteger('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->bigInteger('category_id')->unsigned();
