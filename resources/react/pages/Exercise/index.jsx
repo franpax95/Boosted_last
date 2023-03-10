@@ -9,14 +9,14 @@ import { beautifyDate } from '../../utils/dates';
 import { StyledExercise } from './style';
 import DarkIMG from '../../../images/athlete7-transparencies.png';
 import LightIMG from '../../../images/athlete8-transparencies.png';
-import { DetailsPageHeader } from '../../components/Header';
 
 const PrimaryButton = lazy(() => import('../../components/Button').then(module => ({ default: module.PrimaryButton })));
 const SecondaryButton = lazy(() => import('../../components/Button').then(module => ({ default: module.SecondaryButton })));
 const SuccessButton = lazy(() => import('../../components/Button').then(module => ({ default: module.SuccessButton })));
 const DangerButton = lazy(() => import('../../components/Button').then(module => ({ default: module.DangerButton })));
+const DetailsPageHeader = lazy(() => import('../../components/Header').then(module => ({ default: module.DetailsPageHeader })));
 const CategoryToggle = lazy(() => import('../../components/Input').then(module => ({ default: module.CategoryToggle })));
-const PrimaryFileInput = lazy(() => import('../../components/Input').then(module => ({ default: module.PrimaryImageInput })));
+const PrimaryImageInput = lazy(() => import('../../components/Input').then(module => ({ default: module.PrimaryImageInput })));
 const PrimaryInput = lazy(() => import('../../components/Input').then(module => ({ default: module.PrimaryInput })));
 const PrimaryTextarea = lazy(() => import('../../components/Input').then(module => ({ default: module.PrimaryTextarea })));
 
@@ -39,7 +39,7 @@ const controller2exercise = ({ isNewCategory, categoryId, categoryName, ...contr
 });
 
 export default function Exercise() {
-    /**  */
+    /** Ref of br */
     const ref = useRef();
     /** Url Params */
     const { id } = useParams();
@@ -82,6 +82,7 @@ export default function Exercise() {
         setFormController(exercise ? exercise2controller(exercise) : null);
     }, [exercise]);
 
+    // componentDidUpdate -> showForm: scroll into ref when show or hide edit form
     useEffect(() => {
         if (ref.current) {
             ref.current.scrollIntoView({ behavior: 'smooth' });
@@ -90,7 +91,7 @@ export default function Exercise() {
 
     /**
      * 'Click' event handler for cancel (form) button.
-     * Hide the category form and reset name field.
+     * Hide the form and reset controller.
      */
     const onCancelClick = event => {
         setShowForm(false);
@@ -307,7 +308,7 @@ export default function Exercise() {
                                     label={texts.txt16}
                                 />
 
-                                <PrimaryFileInput 
+                                <PrimaryImageInput 
                                     id={`image-input`}
                                     className="edit-image-input"
                                     value={formController.image}

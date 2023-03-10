@@ -102,7 +102,7 @@ function ExercisesProvider({ children }) {
      * Edit an exercise. If edited successfully, it asks for the exercise again.
      * Returns true or false indicating whether the edit was successful.
      */
-    async function updateExercise({ exercise, loading: haveLoading = true, toast: haveToast = true } = {}) {
+    async function updateExercise({ exercise, loading: haveLoading = true, toast: haveToast = true, shouldRefresh = true } = {}) {
         const successMessage = texts.txt3;
         const errorMessage = texts.txt4;
         const showErrorToast = () => toast.error(errorMessage, toastConfig());
@@ -125,7 +125,7 @@ function ExercisesProvider({ children }) {
             .then(data => true)
             .catch(error => false);
 
-        if (editted) await refresh();
+        if (editted && shouldRefresh) await refresh();
         if (haveLoading) setLoading(false);
 
         return editted;

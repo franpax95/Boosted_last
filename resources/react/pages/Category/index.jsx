@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, Suspense, lazy } from 'react';
+import React, { useContext, useEffect, useRef, useState, Suspense, lazy, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { StyledCategory } from './style';
 // import { RandomImageCard } from '../../components/Card';
@@ -10,24 +10,39 @@ import { clone, deleteAccents, deleteArrayElement } from '../../utils';
 import { beautifyDate } from '../../utils/dates';
 import DarkIMG from '../../../images/athlete3-transparencies.png';
 import LightIMG from '../../../images/athlete4-transparencies.png';
+import { Base64Image } from '../../components/Image';
 
-const ExercisesTable = lazy(() => import('../../components/Table').then(module => ({ default: module.ExercisesTable })));
 const PrimaryLink = lazy(() => import('../../components/Anchor').then(module => ({ default: module.PrimaryLink })));
-const PrimaryInput = lazy(() => import('../../components/Input').then(module => ({ default: module.PrimaryInput })));
-const SearchBar = lazy(() => import('../../components/Input').then(module => ({ default: module.SearchBar })));
 const PrimaryButton = lazy(() => import('../../components/Button').then(module => ({ default: module.PrimaryButton })));
 const SecondaryButton = lazy(() => import('../../components/Button').then(module => ({ default: module.SecondaryButton })));
 const SuccessButton = lazy(() => import('../../components/Button').then(module => ({ default: module.SuccessButton })));
 const DangerButton = lazy(() => import('../../components/Button').then(module => ({ default: module.DangerButton })));
-const GradientBackground = lazy(() => import('../../components/Background').then(module => ({ default: module.GradientBackground })));
-const ImageBackground = lazy(() => import('../../components/Background').then(module => ({ default: module.ImageBackground })));
+const PrimaryInput = lazy(() => import('../../components/Input').then(module => ({ default: module.PrimaryInput })));
+const PrimaryImageInput = lazy(() => import('../../components/Input').then(module => ({ default: module.PrimaryImageInput })));
+const SearchBar = lazy(() => import('../../components/Input').then(module => ({ default: module.SearchBar })));
+const DetailsPageHeader = lazy(() => import('../../components/Header').then(module => ({ default: module.DetailsPageHeader })));
+const ExercisesTable = lazy(() => import('../../components/Table').then(module => ({ default: module.ExercisesTable })));
 
 export default function Category() {
+    /** Ref of br */
+    const ref = useRef();
+    /** Ref of form inself to calculate height */
+    // const sliderRef = useRef();
+    const sliderRef = useCallback(node => {
+        if (node !== null) {
+            console.dir(node); // node = elRef.current
+            console.dir(node.scrollHeight);
+        }
+    }, []);
+
+    const [sliderHeight, setSliderHeight] = useState('600px');
+
+    useEffect(() => console.dir(sliderRef), [sliderRef]);
+
     /** Url Params */
     const { id } = useParams();
     /** Navigation */
     const navigate = useNavigate();
-
     /** Settings Context */
     const { setLoading, openModal, closeAllModal } = useContext(SettingsContext);
     /** Categories Context */
@@ -36,7 +51,6 @@ export default function Category() {
     const { refresh: refreshExercises, deleteExercises } = useContext(ExercisesContext);
     /** Language */
     const { pages: { Category: texts }} = useLanguage();
-
     /** Searchbar input controller */
     const [search, setSearch] = useState('');
     /** Exercises to see in the table */
@@ -48,7 +62,7 @@ export default function Category() {
     /** state to render Edit Form */
     const [showForm, setShowForm] = useState(false);
     /** state with a copy of the category to handle form fields */
-    const [name, setName] = useState('');
+    const [formController, setFormController] = useState(category);
 
     // ComponentDidMount: fetch category into component when needed
     useEffect(() => {
@@ -63,13 +77,6 @@ export default function Category() {
         fetch();
     }, []);
 
-    // ComponentDidUpdate: category. Update form controller when category changes.
-    useEffect(() => {
-        if (category !== null) {
-            setName(category.name);
-        }
-    }, [category]);
-
     // componentDidUpdate. Update filtered exercises when the category change.
     useEffect(() => {
         if (category !== null) {
@@ -77,6 +84,18 @@ export default function Category() {
             setFilteredExercises(applyFilters(exs));
         }
     }, [category, search]);
+
+    // ComponentDidUpdate: category. Update form controller when category changes.
+    useEffect(() => {
+        setFormController(category);
+    }, [category]);
+
+    // componentDidUpdate -> showForm: scroll into ref when show or hide edit form
+    useEffect(() => {
+        if (ref.current) {
+            ref.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [showForm]);
 
     // Return the filtered excercises based on the value of the filters (only search this time)
     const applyFilters = exercises => {
@@ -95,11 +114,14 @@ export default function Category() {
 
     /**
      * 'Click' event handler for cancel (form) button.
-     * Hide the category form and reset name field.
+     * Hide the form and reset controller.
      */
     const onCancelClick = event => {
-        setName(category.name);
         setShowForm(false);
+
+        setTimeout(() => {
+            setFormController(category);
+        }, 500);
     }
 
     /**
@@ -168,13 +190,13 @@ export default function Category() {
     const onDeleteExercisesClick = async event => {
         if (selectedExercises.length === 0) {
             openModal({
-                title: texts.txt20,
-                content: [texts.txt21]
+                title: texts.txt17,
+                content: [texts.txt20]
             });
         } else {
             openModal({
-                title: texts.txt20,
-                content: [texts.txt22],
+                title: texts.txt17,
+                content: [texts.txt21],
                 onAccept: () => {
                     deleteExercises({ exercises: selectedExercises })
                         .then(deleted => {
@@ -194,9 +216,16 @@ export default function Category() {
      * Show the category form.
      */
     const onEditClick = event => {
-        if (category !== null) {
+        if (formController !== null) {
             setShowForm(true);
         }
+    }
+
+    /**
+     * 'Change' event handler for inputs.
+     */
+    const onFormControllerChange = (attr, value) => {
+        setFormController(prev => ({ ...prev, [attr]: value }));
     }
 
     /**
@@ -204,11 +233,7 @@ export default function Category() {
      * Update category and, if success, hide the category form.
      */
     const onSaveClick = async event => {
-        const cat = { id: category.id, name };
-        const ok = await updateCategory({ category: cat });
-        if (ok) {
-            setShowForm(false);
-        }
+        saveCategory();
     }
 
     /**
@@ -231,14 +256,19 @@ export default function Category() {
     }
 
     /**
-     * 'Submit' event handler for form. 
-     * Prevent the form and call to save.
+     * 'Submit' event handler for edit exercise form.
+     * Update the exercise.
      */
-    const onSubmit = async e => {
+    const onSubmit = e => {
         e.preventDefault();
+        saveCategory();
+    }
 
-        const cat = { id: category.id, name };
-        const ok = await updateCategory({ category: cat });
+    /**
+     * Update the category
+     */
+    const saveCategory = async () => {
+        const ok = await updateCategory({ category: formController });
         if (ok) {
             setShowForm(false);
         }
@@ -257,95 +287,79 @@ export default function Category() {
     return (
         <Suspense>
             <StyledCategory>
-                <header>
-                    <GradientBackground
-                        className="bg1"
-                        dark="linear-gradient(60deg, #2C394B 0%, #082032 100%)"
-                        light="linear-gradient(to top, #F9F6F7 0%, #F0F0F0 100%)"
-                    />
-
-                    <div className="info">
-                        <div className={`cover front ${showForm ? '' : 'active'}`}>
-                            <h1 className="info-title">{texts.txt1}</h1>
-
-                            <div className="info-body category">
-                                <div className="group name">
-                                    <label>{texts.txt2}</label>
-                                    <span>{category.name}</span>
-                                </div>
-
-                                <div className="group">
-                                    <label>{texts.txt3}</label>
-                                    <span>{beautifyDate(category.created_at)}</span>
-                                </div>
-
-                                <div className="group">
-                                    <label>{texts.txt4}</label>
-                                    <span>{beautifyDate(category.updated_at)}</span>
-                                </div>
-                            </div>
-
-                            <div className="info-footer">
-                                <PrimaryButton onClick={onEditClick}>{texts.txt5}</PrimaryButton>
-                                <DangerButton onClick={onDeleteClick}>{texts.txt6}</DangerButton>
-                            </div>
-                        </div>
-
-                        <div className={`cover back ${showForm ? 'active' : ''}`}>
-                            <h1 className="info-title">{texts.txt7}</h1>
-
-                            <form className="info-body category-form" onSubmit={onSubmit}>
-                                <PrimaryInput 
-                                    name="name" 
-                                    value={name} 
-                                    onChange={e => setName(e.target.value)} 
-                                    placeholder={texts.txt8}
-                                    label={texts.txt9}
-                                    autoComplete="off"
-                                />
-                            </form>
-
-                            <div className="info-footer">
-                                <SuccessButton className="header-btn" onClick={onSaveClick}>{texts.txt10}</SuccessButton>
-                                <SecondaryButton className="header-btn" onClick={onCancelClick}>{texts.txt11}</SecondaryButton>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="backgrounds">
-                        <GradientBackground
-                            className="bg1"
-                            dark="linear-gradient(0deg, rgba(127,186,18,0.33) 0%, rgba(127,186,18,1) 100%)"
-                            light="linear-gradient(0deg, rgba(58,93,223,0.33) 0%, rgba(58,93,223,1) 100%)"
-                        />
-
-                        <ImageBackground 
-                            className="bg2"
-                            objectFit="contain"
-                            light={LightIMG}
-                            dark={DarkIMG}
-                        />
-
-                        <GradientBackground
-                            className="bg3"
-                            dark="linear-gradient(0deg, rgba(127,186,18,1) 0%, rgba(127,186,18,0.33) 100%)"
-                            light="linear-gradient(0deg, rgba(58,93,223,1) 0%, rgba(58,93,223,0.33) 100%)"
-                        />
-                    </div>
-                </header>
-
-                <h1 className="title">{texts.txt12}</h1>
-
-                <SearchBar 
-                    placeholder={texts.txt13}
-                    value={search} 
-                    onChange={e => setSearch(e.target.value)} 
-                    onClear={() => setSearch('')} 
+                <DetailsPageHeader 
+                    title={texts.txt1}
+                    body={texts.txt2}
+                    footer={texts.txt3}
+                    lightIMG={LightIMG}
+                    darkIMG={DarkIMG}
                 />
 
-                <div className="buttons">
-                    <PrimaryLink to="/exercises/add">{texts.txt14}</PrimaryLink>
-                    <DangerButton onClick={onDeleteExercisesClick} disabled={selectedExercises.length === 0}>{texts.txt15}</DangerButton>
+                <br ref={ref} />
+
+                <div className="slider" ref={sliderRef}>
+                    <div className={`card left ${showForm ? '' : 'active'}`}>
+                        <div className="details-info">
+                            <h1 className="title">{texts.txt4}</h1>
+
+                            <div className="group name">
+                                <label>{texts.txt5}</label>
+                                <span>{category.name}</span>
+                            </div>
+
+                            <div className="group created_at">
+                                <label>{texts.txt6}</label>
+                                <span>{beautifyDate(category.created_at)}</span>
+                            </div>
+
+                            <div className="group updated_at">
+                                <label>{texts.txt7}</label>
+                                <span>{beautifyDate(category.updated_at)}</span>
+                            </div>
+
+                            {category.image ? <div className="group image">
+                                <label>{texts.txt8}</label>
+                                <div className="img">
+                                    <Base64Image src={category.image.base64} alt={category.image.name} />
+                                </div>
+                            </div> : ''}
+
+                            <div className="buttons">
+                                <PrimaryButton onClick={onEditClick}>{texts.txt9}</PrimaryButton>
+                                <DangerButton onClick={onDeleteClick}>{texts.txt10}</DangerButton>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className={`card right ${showForm ? 'active' : ''}`}>
+                        <div className="details-form">
+                            <h1 className="title">{texts.txt11}</h1>
+
+                            {formController !== null ? <form onSubmit={onSubmit}>
+                                <PrimaryInput
+                                    className="category-name"
+                                    name="name" 
+                                    value={formController.name} 
+                                    onChange={e => onFormControllerChange('name', e.target.value)} 
+                                    placeholder={texts.txt12}
+                                    label={texts.txt13}
+                                    autoComplete="off"
+                                />
+
+                                <PrimaryImageInput
+                                    id={`image-input`}
+                                    className="edit-image-input"
+                                    value={formController.image}
+                                    onChange={value => onFormControllerChange('image', value)}
+                                />
+                            </form> : ''}
+
+                            <div className="buttons">
+                                <SuccessButton onClick={onSaveClick}>{texts.txt14}</SuccessButton>
+                                <SecondaryButton onClick={onCancelClick}>{texts.txt15}</SecondaryButton>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="table">

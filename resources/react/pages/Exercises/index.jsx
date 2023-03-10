@@ -55,7 +55,7 @@ export default function Exercises() {
     const applyFilters = exercises => {
         let exs = clone(exercises);
 
-        if(search !== '') {
+        if (search !== '') {
             exs = exs.filter(ex => {
                 const { name, description, category_name } = ex;
                 const values = Object.values({ name, description, category_name });

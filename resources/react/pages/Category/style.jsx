@@ -1,10 +1,21 @@
 import styled from 'styled-components';
 import styles from '../../styles/vars';
+import { StyledSection } from '../../styles';
 
 const { color, font, media, transitionDuration } = styles;
 const { primary, secondary, tertiary, quaternary } = color;
 
-export const StyledCategory = styled.section`
+export const StyledCategory = styled(StyledSection)`
+    .slider {
+        min-height: 550px;
+
+        .right:not(.active) .edit-image-input .screen.active {
+            pointer-events: none;
+        }
+    }
+`;
+
+export const OldStyledCategory = styled.section`
     width: 100%;
     /* max-width: 600px; */
     min-height: 100%;
