@@ -65,6 +65,7 @@ export const StyledPrimaryInput = styled.span`
         + label {
             padding: 0px 15px;
             height: var(--input-height);
+            width: ${props => props.labelSize ? `${props.labelSize}px` : 'auto'};
 
             position: absolute;
             top: 0;

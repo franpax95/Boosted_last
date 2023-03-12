@@ -1,16 +1,14 @@
 import React, { useContext, useEffect, useRef, useState, Suspense, lazy, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { StyledCategory } from './style';
-// import { RandomImageCard } from '../../components/Card';
 import { SettingsContext } from '../../contexts/SettingsContext';
-import { CategoriesContext } from '../../contexts/CategoriesContext';
-import { ExercisesContext } from '../../contexts/ExercisesContext';
+import { ReducerContext } from '../../contexts/ReducerContext';
 import useLanguage from '../../hooks/useLanguage';
+import { StyledCategory } from './style';
+import { Base64Image } from '../../components/Image';
 import { clone, deleteAccents, deleteArrayElement } from '../../utils';
 import { beautifyDate } from '../../utils/dates';
 import DarkIMG from '../../../images/athlete3-transparencies.png';
 import LightIMG from '../../../images/athlete4-transparencies.png';
-import { Base64Image } from '../../components/Image';
 
 const PrimaryLink = lazy(() => import('../../components/Anchor').then(module => ({ default: module.PrimaryLink })));
 const PrimaryButton = lazy(() => import('../../components/Button').then(module => ({ default: module.PrimaryButton })));
@@ -26,29 +24,14 @@ const ExercisesTable = lazy(() => import('../../components/Table').then(module =
 export default function Category() {
     /** Ref of br */
     const ref = useRef();
-    /** Ref of form inself to calculate height */
-    // const sliderRef = useRef();
-    const sliderRef = useCallback(node => {
-        if (node !== null) {
-            console.dir(node); // node = elRef.current
-            console.dir(node.scrollHeight);
-        }
-    }, []);
-
-    const [sliderHeight, setSliderHeight] = useState('600px');
-
-    useEffect(() => console.dir(sliderRef), [sliderRef]);
-
     /** Url Params */
     const { id } = useParams();
     /** Navigation */
     const navigate = useNavigate();
     /** Settings Context */
-    const { setLoading, openModal, closeAllModal } = useContext(SettingsContext);
-    /** Categories Context */
-    const { category, fetchCategory, updateCategory, deleteCategory } = useContext(CategoriesContext);
-    /** ExercisesContext */
-    const { refresh: refreshExercises, deleteExercises } = useContext(ExercisesContext);
+    const { openModal, closeAllModal } = useContext(SettingsContext);
+    /** Data */
+    const { category, fetchCategory, updateCategory, deleteCategory, deleteExercises } = useContext(ReducerContext);
     /** Language */
     const { pages: { Category: texts }} = useLanguage();
     /** Searchbar input controller */
@@ -92,20 +75,20 @@ export default function Category() {
 
     // componentDidUpdate -> showForm: scroll into ref when show or hide edit form
     useEffect(() => {
-        if (ref.current) {
+        if (ref && ref.current) {
             ref.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [showForm]);
 
-    // Return the filtered excercises based on the value of the filters (only search this time)
+    // Return the filtered exercises based on the value of the filters (only search this time)
     const applyFilters = exercises => {
         let exs = clone(exercises);
 
         if (search !== '') {
             exs = exs.filter(ex => {
-                // const values = Object.values(c);
-                // return values.some(value => (deleteAccents(value.toString().toLowerCase()).includes(deleteAccents(search.toLowerCase()))));
-                return deleteAccents(ex.name.toLowerCase()).includes(deleteAccents(search.toLowerCase()));
+                const { name, description, category } = ex;
+                const values = Object.values({ name, description, category: category.name });
+                return values.some(value => (value && deleteAccents(value.toString().toLowerCase()).includes(deleteAccents(search.toLowerCase()))));
             });
         }
 
@@ -135,17 +118,7 @@ export default function Category() {
 
         if (category !== null) {
             const delCat = async () => {
-                setLoading(true);
-
-                const cat = clone(category);
-                const deleted = await deleteCategory({ id: cat.id, loading: false });
-                if (deleted && Array.isArray(cat.exercises) && cat.exercises.length > 0) {
-                    // We refresh the exercises if category had any
-                    await refreshExercises();
-                }
-
-                setLoading(false);
-
+                const deleted = await deleteCategory();
                 if (deleted) {
                     navigate('/categories');
                 }
@@ -201,7 +174,6 @@ export default function Category() {
                     deleteExercises({ exercises: selectedExercises })
                         .then(deleted => {
                             if (deleted) {
-                                fetchCategory({ id, force: true });
                                 setSelectedExercises([]);
                             }
                         });
@@ -237,8 +209,8 @@ export default function Category() {
     }
 
     /**
-     * 'Change' event handler when a category is marked/unmarked. 
-     * Update the selected categories.
+     * 'Change' event handler when an exercise is marked/unmarked. 
+     * Update the selected exercises.
      */
     const onSelectedChange = id => {
         setSelectedExercises(prev => {
@@ -297,7 +269,7 @@ export default function Category() {
 
                 <br ref={ref} />
 
-                <div className="slider" ref={sliderRef}>
+                <div className="slider">
                     <div className={`card left ${showForm ? '' : 'active'}`}>
                         <div className="details-info">
                             <h1 className="title">{texts.txt4}</h1>
@@ -360,6 +332,22 @@ export default function Category() {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <hr style={{ width: '150px' }}/>
+
+                <h2 className="title">{texts.txt24}</h2>
+
+                <SearchBar 
+                    placeholder={texts.txt25}
+                    value={search} 
+                    onChange={e => setSearch(e.target.value)} 
+                    onClear={() => setSearch('')} 
+                />
+
+                <div className="buttons">
+                    <PrimaryLink to={`/exercises/add/${id}`}>{texts.txt22}</PrimaryLink>
+                    <DangerButton onClick={onDeleteExercisesClick} disabled={selectedExercises.length === 0}>{texts.txt23}</DangerButton>
                 </div>
 
                 <div className="table">

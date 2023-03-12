@@ -7,7 +7,7 @@ const { primary, secondary, tertiary, quaternary } = color;
 
 export const StyledCategory = styled(StyledSection)`
     .slider {
-        min-height: 550px;
+        min-height: 400px;
 
         .right:not(.active) .edit-image-input .screen.active {
             pointer-events: none;

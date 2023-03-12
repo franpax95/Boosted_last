@@ -3,19 +3,16 @@ import * as ReactDOMClient from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
 import { SettingsProvider } from './contexts/SettingsContext';
+import { FetchingProvider } from './contexts/FetchContext';
 import { UserProvider } from './contexts/UserContext';
 import { CategoriesProvider } from './contexts/CategoriesContext';
 import { ExercisesProvider } from './contexts/ExercisesContext';
 import { RoutinesProvider } from './contexts/RoutinesContext';
+import { ReducerProvider } from './contexts/ReducerContext';
 
 import { GlobalStyle } from './styles/global';
 import App from './components/App';
 import './styles/fonts.css';
-import { FetchingProvider } from './contexts/FetchContext';
-
-
-// import { Buffer } from 'buffer'
-// globalThis.Buffer = Buffer
 
 const app = ReactDOMClient.createRoot(document.getElementById('root'));
 
@@ -27,10 +24,12 @@ app.render(
                 <CategoriesProvider>
                     <ExercisesProvider>
                         <RoutinesProvider>
-                            <BrowserRouter>
-                                <GlobalStyle />
-                                <App />
-                            </BrowserRouter>
+                            <ReducerProvider>
+                                <BrowserRouter>
+                                    <GlobalStyle />
+                                    <App />
+                                </BrowserRouter>
+                            </ReducerProvider>
                         </RoutinesProvider>
                     </ExercisesProvider>
                 </CategoriesProvider>

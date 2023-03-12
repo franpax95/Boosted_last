@@ -1,12 +1,11 @@
 import React, { useContext, useEffect, useState, Suspense, lazy } from 'react';
-import { ExercisesContext } from '../../contexts/ExercisesContext';
 import { StyledExercises, StyledNotFoundExercises } from './style';
 import { clone, deleteAccents, deleteArrayElement } from '../../utils';
 import { SettingsContext } from '../../contexts/SettingsContext';
 import useLanguage from '../../hooks/useLanguage';
 import DarkIMG from '../../../images/athlete6-transparencies.png';
 import LightIMG from '../../../images/athlete5-transparencies.png';
-import { CategoriesContext } from '../../contexts/CategoriesContext';
+import { ReducerContext } from '../../contexts/ReducerContext';
 
 const ExercisesTable = lazy(() => import('../../components/Table').then(module => ({ default: module.ExercisesTable })));
 const SearchBar = lazy(() => import('../../components/Input').then(module => ({ default: module.SearchBar })));
@@ -15,12 +14,10 @@ const DangerButton = lazy(() => import('../../components/Button').then(module =>
 const CollectionPageHeader = lazy(() => import('../../components/Header').then(module => ({ default: module.CollectionPageHeader })));
 
 export default function Exercises() {
-    /** Categories Context */
-    const { refresh: refreshCategories } = useContext(CategoriesContext);
-    /** Exercises Context */
-    const { exercises, fetchExercises, deleteExercises } = useContext(ExercisesContext);
     /** Settings Context */
     const { openModal } = useContext(SettingsContext);
+    /** Data Funcionality */
+    const { exercises, fetchExercises, deleteExercises } = useContext(ReducerContext);
     /** Language */
     const { pages: { Exercises: texts }} = useLanguage();
     /** Searchbar input controller */
@@ -57,8 +54,8 @@ export default function Exercises() {
 
         if (search !== '') {
             exs = exs.filter(ex => {
-                const { name, description, category_name } = ex;
-                const values = Object.values({ name, description, category_name });
+                const { name, description, category } = ex;
+                const values = Object.values({ name, description, category: category.name });
                 return values.some(value => (value && deleteAccents(value.toString().toLowerCase()).includes(deleteAccents(search.toLowerCase()))));
             });
         }
@@ -85,7 +82,6 @@ export default function Exercises() {
                         .then(deleted => {
                             if (deleted) {
                                 setSelectedExercises([]);
-                                refreshCategories();
                             }
                         });
                 },

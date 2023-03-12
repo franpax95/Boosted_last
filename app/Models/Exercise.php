@@ -21,6 +21,15 @@ class Exercise extends Model
     }
 
     public function image() {
-        return $this->hasOne(Document::class, 'id');
+        return $this->hasOne(Document::class, 'id', 'document_id');
+    }
+
+    // this is the recommended way for declaring event handlers
+    public static function boot() {
+        parent::boot();
+
+        self::deleting(function($category) { // before delete() method call this
+            $category->image()->delete();
+        });
     }
 }

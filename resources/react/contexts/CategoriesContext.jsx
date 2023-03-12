@@ -192,10 +192,10 @@ function CategoriesProvider({ children }) {
     /**
      * Refresh the data loaded in the context
      */
-    async function refresh() {
+    async function refresh({ single = true, collection = true } = {}) {
         let promises = [];
 
-        if (categories !== null) {
+        if (collection && categories !== null) {
             const [categoriesProm, categoriesResolve, categoriesReject] = getPromise();
             promises.push(categoriesProm);
 
@@ -204,7 +204,7 @@ function CategoriesProvider({ children }) {
                 .catch(cats => categoriesReject());
         }
 
-        if (category !== null) {
+        if (single && category !== null) {
             const [categoryProm, categoryResolve, categoryReject] = getPromise();
             promises.push(categoryProm);
 

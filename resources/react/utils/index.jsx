@@ -5,6 +5,20 @@
  * @returns          copia del objeto
  */
 export const clone = original => {
+    // if (Array.isArray(original)) {
+    //     return original.map(el => structuredClone(el));
+    // } 
+    
+    // else if (typeof original === 'object') {
+    //     let copy = {};
+
+    //     for (let attr in original) {
+    //         copy[attr] = structuredClone(original[attr]);
+    //     }
+
+    //     return copy;
+    // }
+
     return structuredClone(original);
     return JSON.parse(JSON.stringify(original));
 }

@@ -72,6 +72,7 @@ function ExercisesProvider({ children }) {
      * Returns the recently inserted data.
      */
     async function insertExercises({ exercises, loading: haveLoading = true, toast: haveToast = true, shouldRefresh = true } = {}) {
+        console.dir(exercises);
         if (!Array.isArray(exercises)) {
             return null;
         }
@@ -102,7 +103,7 @@ function ExercisesProvider({ children }) {
      * Edit an exercise. If edited successfully, it asks for the exercise again.
      * Returns true or false indicating whether the edit was successful.
      */
-    async function updateExercise({ exercise, loading: haveLoading = true, toast: haveToast = true, shouldRefresh = true } = {}) {
+    async function updateExercise({ exercise, loading: haveLoading = true, toast: haveToast = true, refresh: shouldRefresh = true } = {}) {
         const successMessage = texts.txt3;
         const errorMessage = texts.txt4;
         const showErrorToast = () => toast.error(errorMessage, toastConfig());
@@ -135,7 +136,7 @@ function ExercisesProvider({ children }) {
      * Delete an exercise. If it is removed successfully, it asks for the exercises again.
      * Returns true or false indicating whether the deletion was successful.
      */
-    async function deleteExercise({ id, loading: haveLoading = true, toast: haveToast = true } = {}) {
+    async function deleteExercise({ id, loading: haveLoading = true, toast: haveToast = true, refresh: shouldRefresh = true } = {}) {
         const successMessage = texts.txt5;
         const errorMessage = texts.txt6;
         const showErrorToast = () => toast.error(errorMessage, toastConfig());
@@ -157,7 +158,7 @@ function ExercisesProvider({ children }) {
             .then(data => true)
             .catch(error => false);
 
-        if (deleted) await refresh();
+        if (deleted && shouldRefresh) await refresh();
         if (haveLoading) setLoading(false);
         
         return deleted;
@@ -167,7 +168,7 @@ function ExercisesProvider({ children }) {
      * Delete a group of exercises. If it is removed successfully, it asks for the exercises again.
      * Returns true or false indicating whether the deletion was successful.
      */
-    async function deleteExercises({ exercises, loading: haveLoading = true, toast: haveToast = true } = {}) {
+    async function deleteExercises({ exercises, loading: haveLoading = true, toast: haveToast = true, refresh: shouldRefresh = true } = {}) {
         const successMessage = texts.txt7;
         const errorMessage = texts.txt8;
         const showErrorToast = () => toast.error(errorMessage, toastConfig());
@@ -190,7 +191,7 @@ function ExercisesProvider({ children }) {
             .then(data => true)
             .catch(error => false);
 
-        if (deleted) await refresh();
+        if (deleted && shouldRefresh) await refresh();
         if (haveLoading) setLoading(false);
         
         return deleted;
@@ -199,10 +200,10 @@ function ExercisesProvider({ children }) {
     /**
      * Refresh the data loaded in the context
      */
-    async function refresh() {
+    async function refresh({ single = true, collection = true } = {}) {
         let promises = [];
 
-        if (exercises !== null) {
+        if (collection && exercises !== null) {
             const [exercisesProm, exercisesResolve, exercisesReject] = getPromise();
             promises.push(exercisesProm);
 
@@ -211,7 +212,7 @@ function ExercisesProvider({ children }) {
                 .catch(exs => exercisesReject());
         }
 
-        if (exercise !== null) {
+        if (single && exercise !== null) {
             const [exerciseProm, exerciseResolve, exerciseReject] = getPromise();
             promises.push(exerciseProm);
 

@@ -277,7 +277,7 @@ export const ExercisesTable = memo(({ exercises = [], withCategories = false, se
                         </div> : ''}
 
                         <div className="preview">
-                            {exercise.image && <Base64Image src={exercise.image} alt={exercise.name} />}
+                            {exercise.image && <Base64Image src={exercise.image.base64} alt={exercise.image.name} />}
                         </div>
 
                         <div className="name">
@@ -289,7 +289,7 @@ export const ExercisesTable = memo(({ exercises = [], withCategories = false, se
                         </div>
 
                         {withCategories ? <div className="category_name">
-                            <span>{exercise.category_name}</span>
+                            <span>{exercise.category ? exercise.category.name : ''}</span>
                         </div> : ''}
 
                         <div className="created_at centered">

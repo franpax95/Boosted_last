@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState, Suspense, lazy } from 'react';
 import { StyledSection, StyledNotFoundCollection } from '../../styles';
 import { SettingsContext } from '../../contexts/SettingsContext';
-import { CategoriesContext } from '../../contexts/CategoriesContext';
 import { clone, deleteAccents, deleteArrayElement } from '../../utils';
 import useLanguage from '../../hooks/useLanguage';
 import DarkIMG from '../../../images/athlete1-transparencies.png';
 import LightIMG from '../../../images/athlete2-transparencies.png';
+import { ReducerContext } from '../../contexts/ReducerContext';
 
 const CategoriesTable = lazy(() => import('../../components/Table').then(module => ({ default: module.CategoriesTable })));
 const SearchBar = lazy(() => import('../../components/Input').then(module => ({ default: module.SearchBar })));
@@ -14,10 +14,10 @@ const DangerButton = lazy(() => import('../../components/Button').then(module =>
 const CollectionPageHeader = lazy(() => import('../../components/Header').then(module => ({ default: module.CollectionPageHeader })));
 
 export default function Categories() {
-    /** Categories Context */
-    const { categories, fetchCategories, deleteCategories } = useContext(CategoriesContext);
     /** Settings Context */
     const { openModal } = useContext(SettingsContext);
+    /** Categories Context */
+    const { categories, fetchCategories, deleteCategories } = useContext(ReducerContext);
     /** Language */
     const { pages: { Categories: texts }} = useLanguage();
     /** Searchbar input controller */
@@ -148,10 +148,10 @@ export default function Categories() {
                 )}
 
                 {categories && categories.length === 0 && (
-                    <StyledNotFoundCategories>
+                    <StyledNotFoundCollection>
                         <span>{texts.txt5}</span>
                         <span>{texts.txt6}</span>
-                    </StyledNotFoundCategories>
+                    </StyledNotFoundCollection>
                 )}
             </StyledSection>
         </Suspense>

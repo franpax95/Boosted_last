@@ -126,6 +126,8 @@ function SettingsProvider({ children }) {
 
         if (Array.isArray(content)) {
             setModals(prev => [...prev, { id, title, content, onAccept, onCancel, closeAnimation: false, align }]);
+        } else {
+            console.error('ERROR - openModal - content is not an array');
         }
     }
 

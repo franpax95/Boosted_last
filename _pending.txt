@@ -1,0 +1,76 @@
+===========================================================================================
+==================================== TAREAS PENDIENTES ====================================
+===========================================================================================
+
++ General 
+    - Añadir imagen coqueta para el Not Found de las colecciones.
+    - Preparar llamada para insertar categorías, ejercicios y rutinas recomendadas, que se llame al presionar un botón en el UserSettings page o desde el registro.
+    - Limitar tamaño imágenes.
+    - Comprobar cuál es el límite para el backend para las llamadas con imágenes muy grandes.
+
++ NotFound
+    - Crear page.
+
++ Components
+    - AddFormPageHeader 
+        · Añadir imagen a esta cabecera.
+    - PrimaryImageInput 
+        · Tocar el modal para cambiarle los estilos.
+    - Navbar
+        · Que mantenga los links activos por sección y no por url...
+        · Sólo deben ser no clickables por url, pero mantenerse los estilos activos por sección.
+
++ Exercise Controller
+    - Cambiar las llamadas para que devuelva correctamente la relación de la imagen.
+
++ Login 
+    - UI/UX.
+
++ Register 
+    - UI/UX.
+
++ Category
+
+
++ CategoriesAdd
+    - Validación.
+
++ Categories 
+
+
++ ExercisesAdd  
+    -Validación.
+
++ Exercise 
+    - Hacer que el slider tenga una altura dinámica en relación a las dos caras
+    - Implementación de rutinas
+
+___________________________________________________________________________________________
+
+
+
+
+
+
+
+===========================================================================================
+===================================== TAREAS RESUELTAS ====================================
+===========================================================================================
+
++ Category 
+    - Si la categoría no tiene imagen, se corta el formulario. 
+        · Se soluciona poniendo de min-height el tamaño del formulario, que siempre es igual...
+
++ CategoriesAdd
+    - Al cambiar la imagen de, por ejemplo, la segunda categoría, el cambio se guarda en la primera de éstas.
+        · Creo que esto pasa en general para todas las filas que han sido clonadas...
+    - Meter una imagen grande en el form controller hace que los cambios de estado sean costosos, por lo que la escritura de inputs empiza a ralentizarse.
+
++ Categories 
+    - Cuando eliminas varias categorías, hay que hacer refresh de los ejercicios.
+        · Actualmente se quedan cargados los ejercicios de las categorías eliminadas...
+
++ ExercisesAdd 
+    - Pasar por URL la categoría por defecto a mostrar en el selector, para el caso en el que se acceda desde la sección 'Category'.
+
+___________________________________________________________________________________________

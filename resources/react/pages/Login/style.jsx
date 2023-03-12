@@ -1,15 +1,11 @@
 import styled from 'styled-components';
+import styles, { quaternaryDark, quaternaryLight } from '../../styles/vars';
 import theme from 'styled-theming';
 import { THEME } from '../../states/theming';
-import styles from '../../styles';
-import { addOpacityToHex, darken, lighten } from '../../styles/utils';
+import { darken, lighten } from '../../styles/utils';
 
 const { color, font, media, transitionDuration } = styles;
-const { [THEME.LIGHT]: primaryLight, [THEME.DARK]: primaryDark } = color.primary;
-const { [THEME.LIGHT]: secondaryLight, [THEME.DARK]: secondaryDark } = color.secondary;
-const { [THEME.LIGHT]: tertiaryLight, [THEME.DARK]: tertiaryDark } = color.tertiary;
-const { [THEME.LIGHT]: quaternaryLight, [THEME.DARK]: quaternaryDark } = color.quaternary;
-
+const { primary, secondary, tertiary, quaternary, success, danger } = color;
 
 export const StyledLogin = styled.section`
     width: 100%;
@@ -33,8 +29,8 @@ export const StyledLogin = styled.section`
 
         border-radius: 10px;
         background-color: ${theme('mode', { 
-            [THEME.LIGHT]: lighten(quaternaryLight.default, 20), 
-            [THEME.DARK]: darken(quaternaryDark.default, 20)
+            [THEME.LIGHT]: lighten(quaternaryLight, 20), 
+            [THEME.DARK]: darken(quaternaryDark, 20)
         })};
 
 

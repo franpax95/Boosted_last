@@ -144,7 +144,7 @@ class CategoryController extends Controller
     public function show($id)
     {
         try {
-            $category = Category::findOrFail($id)->load('exercises', 'user', 'image');
+            $category = Category::findOrFail($id)->load('exercises', 'exercises.image', 'user', 'image');
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'The category does not exist'], 401);
         } 

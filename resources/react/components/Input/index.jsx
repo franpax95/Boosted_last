@@ -21,19 +21,21 @@ export const Input = ({ id, className = '', type = 'text', name, value, onChange
     />
 );
 
-export const PrimaryInput = (({ id = '', className = '', type = 'text', name = '', value, onChange, placeholder = '', autoComplete = 'on', label = '' }) => {
+export const PrimaryInput = (({ id = '', className = '', type = 'text', name = '', value, onChange, placeholder = '', autoComplete = 'on', label = '', labelSize }) => {
     // label size
-    const [size, set] = useState(0);
+    const [size, set] = useState(labelSize || 0);
     // label ref
     const ref = useRef();
 
     // componentDidUpdate: label. Obtenemos el tamaño del label para saber cuánto 'text-indent' dejar en el input
     useEffect(() => {
         // Si hay label renderizada...
-        if(ref.current) {
+        if (labelSize) {
+            set(labelSize);
+        } else if (ref.current) {
             set(ref.current.clientWidth);
         }
-    }, [label]);
+    }, [label, labelSize]);
 
     return (
         <StyledPrimaryInput labelSize={size} className={className}>
@@ -52,19 +54,21 @@ export const PrimaryInput = (({ id = '', className = '', type = 'text', name = '
     );
 });
 
-export const PrimarySelect = ({ id = '', className = '', name = '', options = [], value, onChange, placeholder = '', label = '' }) => {
+export const PrimarySelect = ({ id = '', className = '', name = '', options = [], value, onChange, placeholder = '', label = '', labelSize }) => {
     // label size
-    const [size, set] = useState(0);
+    const [size, set] = useState(labelSize || 0);
     // label ref
     const ref = useRef();
 
     // componentDidUpdate: label. Obtenemos el tamaño del label para saber cuánto 'text-indent' dejar en el input
     useEffect(() => {
         // Si hay label renderizada...
-        if(ref.current) {
+        if (labelSize) {
+            set(labelSize);
+        } else if (ref.current) {
             set(ref.current.clientWidth);
         }
-    }, [label]);
+    }, [label, labelSize]);
 
     const onSelectChange = event => {
         if(onChange) {
@@ -91,9 +95,9 @@ export const PrimarySelect = ({ id = '', className = '', name = '', options = []
     );
 }
 
-export const PrimaryTextarea = ({ id = '', className = '', name = '', value, onChange, placeholder = '', label = '', maxLength }) => {
+export const PrimaryTextarea = ({ id = '', className = '', name = '', value, onChange, placeholder = '', label = '', maxLength, labelSize }) => {
     // label size
-    const [size, setSize] = useState(0);
+    const [size, setSize] = useState(labelSize || 0);
     // textarea height
     const [height, setHeight] = useState(0);
     // label ref
@@ -105,12 +109,12 @@ export const PrimaryTextarea = ({ id = '', className = '', name = '', value, onC
 
     useEffect(() => {
         const observer = new ResizeObserver(([entry]) => {
-            if(hiddenRef.current) {
+            if (hiddenRef.current) {
                 setHeight(hiddenRef.current.scrollHeight);
             }
         }, { box: 'border-box' });
 
-        if(hiddenRef.current) {
+        if (hiddenRef.current) {
             observer.observe(hiddenRef.current);
         }
     }, []);
@@ -118,26 +122,28 @@ export const PrimaryTextarea = ({ id = '', className = '', name = '', value, onC
     // componentDidUpdate: label. Obtenemos el tamaño del label para saber cuánto 'text-indent' dejar en el input
     useEffect(() => {
         // Si hay label renderizada...
-        if(labelRef.current) {
+        if (labelSize) {
+            setSize(labelSize);
+        } else if (labelRef.current) {
             setSize(labelRef.current.clientWidth);
         }
-    }, [label]);
+    }, [label, labelSize]);
 
     // componentDidUpdate: value. Obtenemos la altura del contenido del formulario y la actualizamos
     useEffect(() => {
-        if(hiddenRef.current) {
+        if (hiddenRef.current) {
             setHeight(hiddenRef.current.scrollHeight);
         }
     }, [value]);
 
     useEffect(() => {
-        if(textareaRef.current) {
+        if (textareaRef.current) {
             textareaRef.current.scrollTop = 0;
         }
     }, [value, height, textareaRef]);
 
     const onTextareaChange = event => {
-        if(textareaRef.current) {
+        if (textareaRef.current) {
             textareaRef.current.scrollTop = 0;
         }
 
@@ -147,7 +153,7 @@ export const PrimaryTextarea = ({ id = '', className = '', name = '', value, onC
     }
 
     const onTextareaFocusBlur = event => {
-        if(hiddenRef.current) {
+        if (hiddenRef.current) {
             setHeight(hiddenRef.current.scrollHeight);
         }
     }

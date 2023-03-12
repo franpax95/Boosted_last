@@ -76,7 +76,8 @@ export const StyledSection = styled.section`
 
     .slider {
         width: 100%;
-        min-height: 150vh;
+        margin-bottom: 3rem;
+        /* min-height: 150vh; */
 
         position: relative;
 
@@ -84,9 +85,6 @@ export const StyledSection = styled.section`
 
         .card {
             width: 100%;
-
-            position: absolute;
-            top: 0;
 
             &.left {
                 pointer-events: none;
@@ -104,6 +102,8 @@ export const StyledSection = styled.section`
 
             &.right {
                 pointer-events: none;
+                position: absolute;
+                top: 0;
                 left: 25%;
                 opacity: 0;
                 transition: left .5s ease-in-out, opacity .25s ease-in-out;
@@ -153,7 +153,7 @@ export const StyledSection = styled.section`
                 max-height: 400px;
                 max-width: 400px;
                 display: flex;
-                justify-content: center;
+                justify-content: flex-start;
                 align-items: center;
 
                 img {

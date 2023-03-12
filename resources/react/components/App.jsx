@@ -133,9 +133,9 @@ export default function App(props) {
                                     <ExercisesAdd />
                                 </RequireAuth>
                             } />
-                            <Route exact path="/exercises/edit/:id" element={
+                            <Route exact path="/exercises/add/:id" element={
                                 <RequireAuth>
-                                    <ExercisesEdit />
+                                    <ExercisesAdd />
                                 </RequireAuth>
                             } />
 
